@@ -148,11 +148,22 @@ function App() {
 
   useEffect(() => {
     const onKeyDown = (e) => {
-      if (e.key === 'Escape') setZoomedIndex(null)
+      if (e.key === 'Escape') {
+        setZoomedIndex(null)
+        return
+      }
+      if (zoomedIndex !== null) return
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        showPrevious()
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        showNext()
+      }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [zoomedIndex])
 
   useEffect(() => {
     if (zoomedIndex !== null) {
@@ -188,9 +199,11 @@ function App() {
     })
   }, [activeIndex, paired])
 
-  const focusPainting = (index, { scrollToPortfolio = false } = {}) => {
+  const focusPainting = (index, { scrollToPortfolio = false, updateConstellation = true } = {}) => {
     setActiveIndex(index)
-    setConstellationPage(Math.floor(index / ITEMS_PER_PAGE))
+    if (updateConstellation) {
+      setConstellationPage(Math.floor(index / ITEMS_PER_PAGE))
+    }
     if (scrollToPortfolio) {
       const stage = document.getElementById('portfolio-lab')
       if (stage) stage.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
@@ -205,15 +218,24 @@ function App() {
     setActiveIndex((prev) => (prev === paired.length - 1 ? 0 : prev + 1))
   }
 
+  const handleStageClick = (e) => {
+    const el = e.currentTarget
+    const rect = el.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const mid = rect.width / 2
+    if (x < mid) showPrevious()
+    else showNext()
+  }
+
   return (
     <div className="site-shell" style={{ '--font-heading': currentFont.family }}>
       <header className="topbar">
-        <p className="topbar__name">Gabriele Wenger-Scherb</p>
         <nav className="topbar__nav" aria-label="Hauptnavigation">
           <a href="#portfolio-lab">Werke</a>
           <a href="#artist">Künstlerin</a>
           <a href="#contact">Kontakt</a>
         </nav>
+        <p className="topbar__name">Gabriele Wenger-Scherb</p>
       </header>
 
       <main>
@@ -245,7 +267,7 @@ function App() {
             <div className="section-head" data-reveal="up">
               <p className="section-label">Portfolio</p>
               <p className="section-note">
-                Werke durchblättern, Perspektiven wechseln und eine eigene Reihenfolge entdecken.
+                Werke durchblättern (Bild links/rechts anklicken oder Pfeiltasten), Perspektiven wechseln und eine eigene Reihenfolge entdecken.
               </p>
             </div>
             <div className="portfolio-lab__layout" data-reveal="scale" data-reveal-delay="80">
@@ -281,7 +303,14 @@ function App() {
                 </div>
 
                 {stageView === 'split' ? (
-                  <div className="portfolio-lab__stage portfolio-lab__stage--split">
+                  <div
+                    className="portfolio-lab__stage portfolio-lab__stage--split"
+                    onClick={handleStageClick}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showNext() } }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Links: vorheriges Werk, Rechts: nächstes Werk"
+                  >
                     <figure className="portfolio-lab__panel">
                       <img src={activePainting.scenarioSrc} alt={`${activePainting.title} im Kontext`} />
                     </figure>
@@ -290,7 +319,14 @@ function App() {
                     </figure>
                   </div>
                 ) : (
-                  <div className="portfolio-lab__stage">
+                  <div
+                    className="portfolio-lab__stage"
+                    onClick={handleStageClick}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showNext() } }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Links: vorheriges Werk, Rechts: nächstes Werk"
+                  >
                     <img
                       src={stageView === 'scenario' ? activePainting.scenarioSrc : activePainting.wallSrc}
                       alt={`${activePainting.title} ${stageView === 'scenario' ? 'im Kontext' : 'an der Wand'}`}
@@ -300,10 +336,22 @@ function App() {
               </div>
 
               <aside className="portfolio-lab__meta">
-                <p className="portfolio-lab__title">{activePainting.title}</p>
-                <p className="portfolio-lab__index">
-                  {String(activeIndex + 1).padStart(2, '0')} / {String(paired.length).padStart(2, '0')}
-                </p>
+                <div className="portfolio-lab__meta-header">
+                  <span className="portfolio-lab__index">
+                    {String(activeIndex + 1).padStart(2, '0')} / {String(paired.length).padStart(2, '0')}
+                  </span>
+                  <h3 className="portfolio-lab__title">{activePainting.title}</h3>
+                </div>
+
+                <div className="portfolio-lab__nav">
+                  <button type="button" onClick={showPrevious} aria-label="Vorheriges Werk">
+                    ←
+                  </button>
+                  <button type="button" onClick={showNext} aria-label="Nächstes Werk">
+                    →
+                  </button>
+                </div>
+
                 <p className="portfolio-lab__description">
                   {stageView === 'split'
                     ? 'Zwei Realitäten zugleich: Atmosphäre im Raum und architektonische Präsenz.'
@@ -312,28 +360,14 @@ function App() {
                       : 'Das Bild tritt dem Raum direkt gegenüber, Materialität und Kanten stehen im Vordergrund.'}
                 </p>
 
-                <div className="portfolio-lab__nav">
-                  <button type="button" onClick={showPrevious}>
-                    Zurück
-                  </button>
-                  <button type="button" onClick={showNext}>
-                    Weiter
-                  </button>
-                </div>
-
                 <div className="portfolio-lab__orbit" aria-label="Benachbarte Werke">
                   {orbitSlots.map(({ offset, index, work }) => (
                     <button
                       key={`${work.id}-${offset}`}
                       type="button"
-                      onClick={() => focusPainting(index, { scrollToPortfolio: true })}
+                      onClick={() => focusPainting(index, { updateConstellation: false })}
                       className={`orbit-node${offset === 0 ? ' is-active' : ''}`}
-                      style={
-                        {
-                          '--offset': offset,
-                          '--depth': Math.abs(offset),
-                        }
-                      }
+                      style={{ '--depth': Math.abs(offset) }}
                       aria-label={`${work.title} auswählen`}
                     >
                       <img src={work.wallSrc} alt="" aria-hidden="true" loading="lazy" />
