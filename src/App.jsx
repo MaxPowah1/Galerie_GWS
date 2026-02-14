@@ -66,6 +66,8 @@ function App() {
   const paired = paintings
   const [scrollY, setScrollY] = useState(0)
   const [reduceMotion, setReduceMotion] = useState(false)
+  const [showSplash, setShowSplash] = useState(true)
+  const [splashClosing, setSplashClosing] = useState(false)
   const [stageView, setStageView] = useState('scenario')
   const [activeIndex, setActiveIndex] = useState(0)
   const [fontIndex, setFontIndex] = useState(0)
@@ -89,6 +91,18 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (!showSplash) return undefined
+    const visibleDuration = 8200
+    const fadeDuration = 1400
+    const hideTimer = window.setTimeout(() => setSplashClosing(true), visibleDuration)
+    const cleanupTimer = window.setTimeout(() => setShowSplash(false), visibleDuration + fadeDuration)
+    return () => {
+      window.clearTimeout(hideTimer)
+      window.clearTimeout(cleanupTimer)
+    }
+  }, [reduceMotion, showSplash])
+
+  useEffect(() => {
     let ticking = false
     const onScroll = () => {
       if (!ticking) {
@@ -106,43 +120,37 @@ function App() {
 
   useEffect(() => {
     const sections = Array.from(document.querySelectorAll('main section'))
-    const revealBySection = new Map()
+    const revealItems = []
     const sequenceStepMs = 220
 
     sections.forEach((section) => {
-      const items = Array.from(section.querySelectorAll('[data-reveal]'))
-      if (!items.length) return
-
-      items.forEach((el, idx) => {
+      const sectionItems = Array.from(section.querySelectorAll('[data-reveal]'))
+      sectionItems.forEach((el, idx) => {
         const baseDelay = Number(el.getAttribute('data-reveal-delay')) || 0
         const sequencedDelay = baseDelay + idx * sequenceStepMs
         el.style.setProperty('--reveal-delay', `${sequencedDelay}ms`)
       })
-
-      revealBySection.set(section, items)
+      revealItems.push(...sectionItems)
     })
 
     if (!('IntersectionObserver' in window)) {
-      revealBySection.forEach((items) => items.forEach((el) => el.classList.add('is-visible')))
+      revealItems.forEach((el) => el.classList.add('is-visible'))
       return undefined
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const items = revealBySection.get(entry.target)
-          if (!items) return
           if (entry.isIntersecting) {
-            items.forEach((el) => el.classList.add('is-visible'))
-          } else {
-            items.forEach((el) => el.classList.remove('is-visible'))
+            entry.target.classList.add('is-visible')
+            observer.unobserve(entry.target)
           }
         })
       },
-      { threshold: 0.2, rootMargin: '0px 0px -12% 0px' },
+      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
     )
 
-    revealBySection.forEach((_, section) => observer.observe(section))
+    revealItems.forEach((item) => observer.observe(item))
     return () => observer.disconnect()
   }, [paired.length])
 
@@ -166,7 +174,7 @@ function App() {
   }, [zoomedIndex])
 
   useEffect(() => {
-    if (zoomedIndex !== null) {
+    if (showSplash || zoomedIndex !== null) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
@@ -174,7 +182,7 @@ function App() {
     return () => {
       document.body.style.overflow = ''
     }
-  }, [zoomedIndex])
+  }, [showSplash, zoomedIndex])
 
   const parallax = useMemo(() => {
     if (reduceMotion) {
@@ -226,9 +234,35 @@ function App() {
     if (x < mid) showPrevious()
     else showNext()
   }
+  const signaturePath = 'M80 100 C 200 100, 280 40, 380 80 C 420 100, 380 140, 320 120 C 260 100, 300 60, 420 60 C 580 60, 700 80, 820 90'
 
   return (
     <div className="site-shell" style={{ '--font-heading': currentFont.family }}>
+      {showSplash && (
+        <div className={`splash-screen${splashClosing ? ' is-leaving' : ''}`} aria-hidden="true">
+          <div className="splash-screen__composition">
+            <p className="splash-screen__title">Gabriele Wenger-Scherb</p>
+            <svg className="splash-screen__signature" viewBox="0 0 900 220" role="presentation" focusable="false">
+              <path
+                pathLength="2200"
+                d={signaturePath}
+              />
+              <circle className="splash-screen__pen" r="3.6" cx="-999" cy="-999">
+                <animateMotion
+                  dur="6.4s"
+                  begin="0.35s"
+                  fill="freeze"
+                  calcMode="spline"
+                  keySplines="0.2 0.9 0.22 1"
+                  keyTimes="0;1"
+                  path={signaturePath}
+                />
+              </circle>
+            </svg>
+            <div className="splash-screen__rule splash-screen__rule--bottom" />
+          </div>
+        </div>
+      )}
       <header className="topbar">
         <nav className="topbar__nav" aria-label="Hauptnavigation">
           <a href="#portfolio-lab">Werke</a>

@@ -5,6 +5,225 @@
   font-size: 1rem;
 }
 
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  opacity: 1;
+  transition: opacity 1200ms ease, visibility 1200ms ease;
+}
+
+.splash-screen.is-leaving {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash-screen__composition {
+  position: relative;
+  width: min(92vw, 980px);
+  min-height: min(76vh, 560px);
+  display: grid;
+  grid-template-rows: 1fr auto auto 1fr;
+  align-items: center;
+  justify-items: center;
+  gap: 0.2rem;
+  animation: splashCompositionFloat 7600ms ease-in-out 300ms forwards;
+}
+
+.splash-screen__label {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.26em;
+  font-size: 0.58rem;
+  color: rgba(17, 17, 17, 0.62);
+  opacity: 0;
+  animation: splashLabelIn 1800ms ease 3900ms forwards;
+}
+
+.splash-screen__title {
+  margin: 0 0 -3.1rem 0;
+  font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+  width: min(96%, 52rem);
+  font-size: clamp(1.55rem, 4.5vw, 3rem);
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  text-align: center;
+  color: #111;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: splashTitleIn 2200ms cubic-bezier(0.2, 1, 0.25, 1) 2850ms forwards;
+}
+
+.splash-screen__signature {
+  width: min(92%, 900px);
+  height: auto;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: splashSignatureEnter 1500ms ease 250ms forwards, splashSignatureDrift 7600ms ease-in-out 250ms forwards;
+}
+
+.splash-screen__signature path {
+  fill: none;
+  stroke: #111;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 2200;
+  stroke-dashoffset: 2200;
+  opacity: 0.92;
+  animation: splashSignatureDraw 6400ms cubic-bezier(0.2, 0.9, 0.22, 1) 350ms forwards, splashInkBreath 2800ms ease-in-out 1200ms 2 alternate;
+}
+
+.splash-screen__pen {
+  fill: #111;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px rgba(17, 17, 17, 0.3));
+  animation: splashPenFade 6600ms ease 350ms forwards, splashPenPulse 1200ms ease-in-out 400ms infinite;
+}
+
+.splash-screen__rule {
+  height: 1px;
+  background: #111;
+  opacity: 0;
+  transform: scaleX(0.08);
+}
+
+.splash-screen__rule--bottom {
+  width: min(28%, 180px);
+  align-self: start;
+  justify-self: center;
+  margin-inline: auto;
+  animation: splashRuleGrow 3400ms cubic-bezier(0.2, 0.9, 0.2, 1) 2600ms forwards;
+}
+
+@keyframes splashSignatureEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashSignatureDraw {
+  0% {
+    stroke-dashoffset: 2200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes splashSignatureDrift {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes splashRuleGrow {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.08);
+  }
+  100% {
+    opacity: 0.68;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes splashTitleIn {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+    letter-spacing: 0.24em;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 0.18em;
+  }
+}
+
+@keyframes splashLabelIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashInkBreath {
+  0% {
+    opacity: 0.7;
+    stroke-width: 1.4;
+  }
+  100% {
+    opacity: 0.98;
+    stroke-width: 1.8;
+  }
+}
+
+@keyframes splashCompositionFloat {
+  0% {
+    transform: translateY(8px);
+  }
+  100% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes splashPenFade {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 0.95;
+  }
+  94% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes splashPenPulse {
+  0% {
+    r: 3.2px;
+  }
+  100% {
+    r: 4.2px;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.hero__eyebrow,
+.hero__galerie-preview,
+.section-label,
+.portfolio-lab__index,
+.portfolio-lab__constellation-title {
+  font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+  font-weight: 300;
+}
+
 .topbar {
   position: fixed;
   top: 0;
