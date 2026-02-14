@@ -2,6 +2,7 @@
   color: #111;
   background: #fff;
   min-height: 100vh;
+  font-size: 1rem;
 }
 
 .topbar {
@@ -66,7 +67,7 @@ main {
   min-height: clamp(34rem, 78vh, 48rem);
   padding-block: clamp(1.4rem, 3vh, 2.4rem) clamp(1.6rem, 3.5vh, 2.8rem);
   margin-top: clamp(4rem, 10vh, 8rem);
-  margin-bottom: clamp(5rem, 12vh, 10rem);
+  margin-bottom: clamp(14rem, 28vh, 22rem);
 }
 
 .hero__intro {
@@ -336,8 +337,8 @@ main {
 }
 
 .portfolio-lab__constellation {
-  margin-top: 2rem;
-  padding-top: 1.3rem;
+  margin-top: clamp(8rem, 18vh, 12rem);
+  padding-top: clamp(5rem, 10vh, 7rem);
   border-top: 1px solid #111;
 }
 
@@ -348,10 +349,46 @@ main {
   font-size: 0.67rem;
 }
 
+.portfolio-lab__constellation-nav-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.5rem, 1.5vw, 0.8rem);
+}
+
+.portfolio-lab__constellation-arrow {
+  flex-shrink: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #111;
+  background: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease, opacity 200ms ease;
+}
+
+.portfolio-lab__constellation-arrow:hover:not(:disabled) {
+  background: #111;
+  color: #fff;
+}
+
+.portfolio-lab__constellation-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: #ccc;
+}
+
 .portfolio-lab__constellation-grid {
+  flex: 1;
+  min-width: 0;
+  max-width: min(680px, 95vw, 80vh);
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.82rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.5rem, 1.2vw, 0.82rem);
 }
 
 .constellation-card {
@@ -384,9 +421,75 @@ main {
   font-size: 0.58rem;
 }
 
+.portfolio-lab__constellation-page-info {
+  margin: 0.6rem 0 0;
+  font-size: 0.65rem;
+  color: #666;
+  letter-spacing: 0.08em;
+}
+
+/* Lightbox für Werkübersicht */
+.constellation-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  cursor: pointer;
+}
+
+.constellation-lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.constellation-lightbox__figure {
+  position: relative;
+  z-index: 1;
+  max-width: 90vw;
+  max-height: 90vh;
+  margin: 0;
+  cursor: default;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+.constellation-lightbox__figure img {
+  display: block;
+  max-width: 100%;
+  max-height: 85vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  background: #fff;
+}
+
+.constellation-lightbox__figure figcaption {
+  padding: 0.75rem 1rem;
+  background: #fff;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #333;
+}
+
+.spotlight {
+  padding: clamp(12rem, 24vh, 18rem) 0;
+}
+
+.manifest {
+  padding: clamp(12rem, 24vh, 18rem) 0;
+  border-top: 1px solid #111;
+}
+
 .artist,
 .contact {
-  padding: 7rem 0 2rem;
+  padding: clamp(14rem, 28vh, 20rem) 0 2rem;
   border-top: 1px solid #111;
 }
 
@@ -426,15 +529,68 @@ main {
   object-fit: cover;
 }
 
+/* Scroll-Reveal: sanfte Animationen beim Einblenden */
 [data-reveal] {
+  --reveal-duration: 2000ms;
+  --reveal-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --reveal-delay: 0ms;
   opacity: 0;
-  transform: translate3d(0, 20px, 0);
-  transition: opacity 400ms ease, transform 400ms ease;
+  filter: blur(8px);
+  transform: translate3d(0, 28px, 0);
+  will-change: opacity, transform, filter;
+  transition:
+    opacity var(--reveal-duration) var(--reveal-ease) var(--reveal-delay),
+    transform var(--reveal-duration) var(--reveal-ease) var(--reveal-delay),
+    filter var(--reveal-duration) var(--reveal-ease) var(--reveal-delay);
 }
 
 [data-reveal].is-visible {
   opacity: 1;
+  filter: blur(0);
   transform: translate3d(0, 0, 0);
+}
+
+/* Varianten: Richtung und Stil */
+[data-reveal="up"] {
+  transform: translate3d(0, 28px, 0);
+}
+[data-reveal="up"].is-visible {
+  transform: translate3d(0, 0, 0);
+}
+
+[data-reveal="down"] {
+  transform: translate3d(0, -28px, 0);
+}
+[data-reveal="down"].is-visible {
+  transform: translate3d(0, 0, 0);
+}
+
+[data-reveal="left"] {
+  transform: translate3d(40px, 0, 0);
+}
+[data-reveal="left"].is-visible {
+  transform: translate3d(0, 0, 0);
+}
+
+[data-reveal="right"] {
+  transform: translate3d(-40px, 0, 0);
+}
+[data-reveal="right"].is-visible {
+  transform: translate3d(0, 0, 0);
+}
+
+[data-reveal="fade"] {
+  transform: none;
+}
+[data-reveal="fade"].is-visible {
+  transform: none;
+}
+
+[data-reveal="scale"] {
+  transform: scale(0.96);
+}
+[data-reveal="scale"].is-visible {
+  transform: scale(1);
 }
 
 @media (max-width: 980px) {
@@ -449,7 +605,7 @@ main {
   }
 
   .portfolio-lab__constellation-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -498,9 +654,14 @@ main {
     scroll-behavior: auto !important;
   }
 
-  [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  [data-reveal],
+  [data-reveal="up"],
+  [data-reveal="down"],
+  [data-reveal="left"],
+  [data-reveal="right"],
+  [data-reveal="fade"],
+  [data-reveal="scale"] {
+    --reveal-duration: 2000ms;
+    filter: none;
   }
 }

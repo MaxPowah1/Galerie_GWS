@@ -69,7 +69,16 @@ function App() {
   const [stageView, setStageView] = useState('scenario')
   const [activeIndex, setActiveIndex] = useState(0)
   const [fontIndex, setFontIndex] = useState(0)
+  const [constellationPage, setConstellationPage] = useState(0)
+  const [zoomedIndex, setZoomedIndex] = useState(null)
   const currentFont = FONT_OPTIONS[fontIndex]
+
+  const ITEMS_PER_PAGE = 4
+  const totalConstellationPages = Math.ceil(paired.length / ITEMS_PER_PAGE) || 1
+  const constellationSlice = paired.slice(
+    constellationPage * ITEMS_PER_PAGE,
+    constellationPage * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+  )
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -96,18 +105,65 @@ function App() {
   }, [])
 
   useEffect(() => {
-    const revealElements = document.querySelectorAll('[data-reveal]')
+    const sections = Array.from(document.querySelectorAll('main section'))
+    const revealBySection = new Map()
+    const sequenceStepMs = 220
+
+    sections.forEach((section) => {
+      const items = Array.from(section.querySelectorAll('[data-reveal]'))
+      if (!items.length) return
+
+      items.forEach((el, idx) => {
+        const baseDelay = Number(el.getAttribute('data-reveal-delay')) || 0
+        const sequencedDelay = baseDelay + idx * sequenceStepMs
+        el.style.setProperty('--reveal-delay', `${sequencedDelay}ms`)
+      })
+
+      revealBySection.set(section, items)
+    })
+
+    if (!('IntersectionObserver' in window)) {
+      revealBySection.forEach((items) => items.forEach((el) => el.classList.add('is-visible')))
+      return undefined
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add('is-visible')
+          const items = revealBySection.get(entry.target)
+          if (!items) return
+          if (entry.isIntersecting) {
+            items.forEach((el) => el.classList.add('is-visible'))
+          } else {
+            items.forEach((el) => el.classList.remove('is-visible'))
+          }
         })
       },
-      { threshold: 0.15, rootMargin: '0px 0px -10% 0px' },
+      { threshold: 0.2, rootMargin: '0px 0px -12% 0px' },
     )
-    revealElements.forEach((item) => observer.observe(item))
+
+    revealBySection.forEach((_, section) => observer.observe(section))
     return () => observer.disconnect()
   }, [paired.length])
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setZoomedIndex(null)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  useEffect(() => {
+    if (zoomedIndex !== null) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [zoomedIndex])
 
   const parallax = useMemo(() => {
     if (reduceMotion) {
@@ -132,10 +188,13 @@ function App() {
     })
   }, [activeIndex, paired])
 
-  const focusPainting = (index) => {
+  const focusPainting = (index, { scrollToPortfolio = false } = {}) => {
     setActiveIndex(index)
-    const stage = document.getElementById('portfolio-lab')
-    if (stage) stage.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+    setConstellationPage(Math.floor(index / ITEMS_PER_PAGE))
+    if (scrollToPortfolio) {
+      const stage = document.getElementById('portfolio-lab')
+      if (stage) stage.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+    }
   }
 
   const showPrevious = () => {
@@ -159,7 +218,7 @@ function App() {
 
       <main>
         <section className="hero" aria-label="Einführung">
-          <div className="hero__intro" data-reveal>
+          <div className="hero__intro" data-reveal="up">
             <p className="hero__eyebrow" style={{ transform: `translate3d(0, ${parallax.heroStatement}px, 0)` }}>
               Portfolio Malerei
             </p>
@@ -172,24 +231,24 @@ function App() {
             <p className="hero__statement">
               Modern. Roh. Lebendig. Ich male die Welt, wie sie ist – ungefiltert und voller Farbe. Vom Chaos eines Walddickichts bis zur stillen Geometrie einer Wohnwagensiedlung in der Dämmerung: Meine Kunst feiert die Texturen des modernen Lebens und lädt zum Innehalten und genauen Hinsehen ein.
             </p>
-            <a href="#portfolio-lab" className="btn btn--dark">
+            <a href="#portfolio-lab" className="btn btn--dark" data-reveal="up" data-reveal-delay="180">
               Zu den Werken
             </a>
           </div>
-          <figure className="hero__image-wrap" data-reveal>
+          <figure className="hero__image-wrap" data-reveal="right">
             <img src={artistPhoto} alt="Gabriele Wenger-Scherb, Künstlerin" className="hero__image" />
           </figure>
         </section>
 
         {activePainting && (
-          <section id="portfolio-lab" className="portfolio-lab" data-reveal>
-            <div className="section-head">
+          <section id="portfolio-lab" className="portfolio-lab">
+            <div className="section-head" data-reveal="up">
               <p className="section-label">Portfolio</p>
               <p className="section-note">
                 Werke durchblättern, Perspektiven wechseln und eine eigene Reihenfolge entdecken.
               </p>
             </div>
-            <div className="portfolio-lab__layout">
+            <div className="portfolio-lab__layout" data-reveal="scale" data-reveal-delay="80">
               <div className="portfolio-lab__stage-wrap">
                 <div className="portfolio-lab__mode" role="tablist" aria-label="Ansicht der Arbeit">
                   <button
@@ -267,7 +326,7 @@ function App() {
                     <button
                       key={`${work.id}-${offset}`}
                       type="button"
-                      onClick={() => focusPainting(index)}
+                      onClick={() => focusPainting(index, { scrollToPortfolio: true })}
                       className={`orbit-node${offset === 0 ? ' is-active' : ''}`}
                       style={
                         {
@@ -285,29 +344,59 @@ function App() {
               </aside>
             </div>
 
-            <div className="portfolio-lab__constellation">
+            <div className="portfolio-lab__constellation" data-reveal="up" data-reveal-delay="120">
               <p className="portfolio-lab__constellation-title">Werkübersicht</p>
-              <div className="portfolio-lab__constellation-grid">
-                {paired.map((art, index) => (
-                  <button
-                    key={art.id}
-                    type="button"
-                    onClick={() => focusPainting(index)}
-                    className={`constellation-card${index === activeIndex ? ' is-active' : ''}`}
-                  >
-                    <img src={index % 2 === 0 ? art.scenarioSrc : art.wallSrc} alt={`${art.title} Vorschau`} loading="lazy" />
-                    <span>{art.title}</span>
-                  </button>
-                ))}
+              <div className="portfolio-lab__constellation-nav-wrap">
+                <button
+                  type="button"
+                  className="portfolio-lab__constellation-arrow"
+                  onClick={() => setConstellationPage((p) => Math.max(0, p - 1))}
+                  disabled={constellationPage === 0}
+                  aria-label="Vorherige 4 Werke"
+                >
+                  ‹
+                </button>
+                <div className="portfolio-lab__constellation-grid">
+                  {constellationSlice.map((art, idx) => {
+                    const index = constellationPage * ITEMS_PER_PAGE + idx
+                    const imgSrc = index % 2 === 0 ? art.scenarioSrc : art.wallSrc
+                    return (
+                      <button
+                        key={art.id}
+                        type="button"
+                        onClick={() => {
+                          focusPainting(index)
+                          setZoomedIndex(index)
+                        }}
+                        className={`constellation-card${index === activeIndex ? ' is-active' : ''}`}
+                      >
+                        <img src={imgSrc} alt={`${art.title} Vorschau`} loading="lazy" />
+                        <span>{art.title}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+                <button
+                  type="button"
+                  className="portfolio-lab__constellation-arrow"
+                  onClick={() => setConstellationPage((p) => Math.min(totalConstellationPages - 1, p + 1))}
+                  disabled={constellationPage >= totalConstellationPages - 1}
+                  aria-label="Nächste 4 Werke"
+                >
+                  ›
+                </button>
               </div>
+              <p className="portfolio-lab__constellation-page-info">
+                Seite {constellationPage + 1} von {totalConstellationPages}
+              </p>
             </div>
           </section>
         )}
 
-        <section id="artist" className="artist" data-reveal>
-          <p className="section-label">Künstlerin</p>
+        <section id="artist" className="artist">
+          <p className="section-label" data-reveal="left">Künstlerin</p>
           <div className="artist__layout">
-            <div className="artist__text">
+            <div className="artist__text" data-reveal="left">
               <h2>Gabriele Wenger-Scherb</h2>
               <p>
                 Meine Kunst ist eine Erkundung der Momente, die wir normalerweise übersehen – der Stapel Wäsche in der Ecke, der Blick aus einem Lastwagen auf einer einsamen Autobahn oder die stille Konzentration eines Menschen bei der Arbeit. Mich fasziniert die Schnittstelle zwischen dem Häuslichen und dem Ungezähmten. Durch kräftige Pinselstriche und eine lebendige Farbpalette übersetze ich die physische Präsenz meiner Umgebung in eine Bildsprache, die sich zugleich vertraut und surreal anfühlt.
@@ -325,7 +414,7 @@ function App() {
                 Ein Gemälde muss für mich lebendig wirken. Indem ich sichtbare Pinselstriche und eine mutige, teils unerwartete Farbenlehre betone, schaffe ich Werke, die zum Innehalten und genauen Hinsehen einladen.
               </p>
             </div>
-            <div className="artist__photo-wrap">
+            <div className="artist__photo-wrap" data-reveal="right" data-reveal-delay="150">
               <img
                 src={artistPhotoPose2}
                 alt="Gabriele Wenger-Scherb, Künstlerin"
@@ -335,8 +424,9 @@ function App() {
           </div>
         </section>
 
-        <section id="contact" className="contact" data-reveal>
-          <p className="section-label">Kontakt</p>
+        <section id="contact" className="contact">
+          <p className="section-label" data-reveal="fade">Kontakt</p>
+          <div data-reveal="fade" data-reveal-delay="80">
           <h2>Anfragen & Kooperationen</h2>
           <p>
             Für Ausstellungen, Preise, Auftragsarbeiten und Studio-Anfragen freue ich mich über Ihre Nachricht.
@@ -344,8 +434,32 @@ function App() {
           <a className="btn btn--dark" href="mailto:studio@example.com">
             gabriele@example.com
           </a>
+          </div>
         </section>
       </main>
+
+      {zoomedIndex !== null && paired[zoomedIndex] && (
+        <div
+          className="constellation-lightbox"
+          onClick={() => setZoomedIndex(null)}
+          onKeyDown={(e) => e.key === 'Enter' && setZoomedIndex(null)}
+          role="button"
+          tabIndex={0}
+          aria-label="Vergrößertes Bild schließen"
+        >
+          <div className="constellation-lightbox__backdrop" />
+          <figure
+            className="constellation-lightbox__figure"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={zoomedIndex % 2 === 0 ? paired[zoomedIndex].scenarioSrc : paired[zoomedIndex].wallSrc}
+              alt={`${paired[zoomedIndex].title} vergrößert`}
+            />
+            <figcaption>{paired[zoomedIndex].title}</figcaption>
+          </figure>
+        </div>
+      )}
     </div>
   )
 }
