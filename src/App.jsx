@@ -259,7 +259,6 @@ function App() {
                 />
               </circle>
             </svg>
-            <div className="splash-screen__rule splash-screen__rule--bottom" />
           </div>
         </div>
       )}
@@ -276,16 +275,16 @@ function App() {
         <section className="hero" aria-label="Einführung">
           <div className="hero__intro" data-reveal="up">
             <p className="hero__eyebrow" style={{ transform: `translate3d(0, ${parallax.heroStatement}px, 0)` }}>
-              Portfolio Malerei
-            </p>
-            <p className="hero__galerie-preview" style={{ transform: `translate3d(0, ${parallax.heroHeadline}px, 0)` }}>
-              Galerie
+              Zeitgenössische Malerei
             </p>
             <h1 className="hero__title" style={{ transform: `translate3d(0, ${parallax.heroHeadline}px, 0)` }}>
               Gabriele Wenger-Scherb
             </h1>
+            <p className="hero__tagline" style={{ transform: `translate3d(0, ${parallax.heroStatement}px, 0)` }}>
+              Modern. Roh. Lebendig.
+            </p>
             <p className="hero__statement">
-              Modern. Roh. Lebendig. Ich male die Welt, wie sie ist – ungefiltert und voller Farbe. Vom Chaos eines Walddickichts bis zur stillen Geometrie einer Wohnwagensiedlung in der Dämmerung: Meine Kunst feiert die Texturen des modernen Lebens und lädt zum Innehalten und genauen Hinsehen ein.
+              Ich male die Welt, wie sie ist – ungefiltert und voller Farbe. Vom Chaos eines Walddickichts bis zur stillen Geometrie einer Wohnwagensiedlung in der Dämmerung: Meine Kunst feiert die Texturen des modernen Lebens und lädt zum Innehalten und genauen Hinsehen ein.
             </p>
             <a href="#portfolio-lab" className="btn btn--dark" data-reveal="up" data-reveal-delay="180">
               Zu den Werken
