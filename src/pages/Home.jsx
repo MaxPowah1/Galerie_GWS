@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import artistPhoto from '../assets/Artist/Artist_foto.png'
 import artistPhotoPose2 from '../assets/Artist/Artist_pose_2.png'
@@ -163,6 +163,9 @@ export default function Home() {
     }
   }
 
+  const touchStartRef = useRef({ x: 0 })
+  const SWIPE_THRESHOLD = 50
+
   const handleStageClick = (e) => {
     const el = e.currentTarget
     const rect = el.getBoundingClientRect()
@@ -170,6 +173,20 @@ export default function Home() {
     const mid = rect.width / 2
     if (x < mid) showPrevious()
     else showNext()
+  }
+
+  const handleStageTouchStart = (e) => {
+    touchStartRef.current.x = e.touches[0]?.clientX ?? 0
+  }
+
+  const handleStageTouchEnd = (e) => {
+    const startX = touchStartRef.current.x
+    const endX = e.changedTouches[0]?.clientX ?? startX
+    const diff = startX - endX
+    if (Math.abs(diff) >= SWIPE_THRESHOLD) {
+      if (diff > 0) showNext()
+      else showPrevious()
+    }
   }
 
   const signaturePath = 'M80 100 C 200 100, 280 40, 380 80 C 420 100, 380 140, 320 120 C 260 100, 300 60, 420 60 C 580 60, 700 80, 820 90'
@@ -256,6 +273,8 @@ export default function Home() {
                 <div
                   className="portfolio-lab__stage portfolio-lab__stage--split"
                   onClick={handleStageClick}
+                  onTouchStart={handleStageTouchStart}
+                  onTouchEnd={handleStageTouchEnd}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault()
@@ -277,6 +296,8 @@ export default function Home() {
                 <div
                   className="portfolio-lab__stage"
                   onClick={handleStageClick}
+                  onTouchStart={handleStageTouchStart}
+                  onTouchEnd={handleStageTouchEnd}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault()

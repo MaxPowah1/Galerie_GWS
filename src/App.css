@@ -242,8 +242,36 @@ h6,
   transition: opacity 320ms ease;
 }
 
-.topbar__nav a:hover {
+.topbar__nav a:hover,
+.topbar__nav a:active {
   opacity: 1;
+}
+
+.topbar__menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.topbar__menu-btn:hover,
+.topbar__menu-btn:active {
+  background: #111;
+  color: #fff;
+}
+
+.topbar__menu-btn-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 main {
@@ -359,8 +387,13 @@ main {
   color: #fff;
 }
 
-.btn--dark:hover {
+.btn--dark:hover,
+.btn--dark:active {
   background: #000;
+}
+
+.btn:active {
+  opacity: 0.9;
 }
 
 .section-head {
@@ -436,6 +469,7 @@ main {
   height: clamp(320px, 62vh, 720px);
   overflow: hidden;
   cursor: pointer;
+  touch-action: pan-y;
 }
 
 .portfolio-lab__stage img {
@@ -527,7 +561,8 @@ main {
   transition: background 220ms ease, color 220ms ease;
 }
 
-.portfolio-lab__nav button:hover {
+.portfolio-lab__nav button:hover,
+.portfolio-lab__nav button:active {
   background: #111;
   color: #fff;
 }
@@ -564,7 +599,8 @@ main {
 }
 
 .orbit-node.is-active,
-.orbit-node:hover {
+.orbit-node:hover,
+.orbit-node:active {
   opacity: 1;
   color: #111;
 }
@@ -638,7 +674,8 @@ main {
   transition: background 200ms ease, color 200ms ease, opacity 200ms ease;
 }
 
-.portfolio-lab__constellation-arrow:hover:not(:disabled) {
+.portfolio-lab__constellation-arrow:hover:not(:disabled),
+.portfolio-lab__constellation-arrow:active:not(:disabled) {
   background: #111;
   color: #fff;
 }
@@ -670,10 +707,12 @@ main {
   text-align: left;
   cursor: pointer;
   transition: border-color 260ms ease, transform 260ms ease;
+  touch-action: manipulation;
 }
 
 .constellation-card:hover,
-.constellation-card.is-active {
+.constellation-card.is-active,
+.constellation-card:active {
   border-color: #111;
   transform: translateY(-2px);
 }
@@ -1096,7 +1135,8 @@ main {
   transition: background 220ms ease, color 220ms ease;
 }
 
-.catalogue-guided__nav button:hover {
+.catalogue-guided__nav button:hover,
+.catalogue-guided__nav button:active {
   background: #111;
   color: #fff;
 }
@@ -1174,9 +1214,11 @@ main {
   background: #fff;
   overflow: hidden;
   transition: transform 280ms ease, box-shadow 280ms ease;
+  touch-action: manipulation;
 }
 
-.catalogue-card:hover {
+.catalogue-card:hover,
+.catalogue-card:active {
   transform: translateY(-3px);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
@@ -1275,6 +1317,15 @@ main {
     max-width: 34rem;
   }
 
+  .portfolio-lab__layout {
+    gap: 1.5rem;
+  }
+
+  .hero {
+    gap: 1.8rem;
+    margin-bottom: clamp(10rem, 22vh, 16rem);
+  }
+
   .portfolio-lab__meta {
     position: static;
     padding: 1.25rem 0 0;
@@ -1306,15 +1357,52 @@ main {
 
 @media (max-width: 680px) {
   main {
-    width: calc(100% - 1.5rem);
+    width: calc(100% - 1rem);
+    padding: 2rem 0 2.5rem;
   }
 
   .topbar {
     padding: 0.72rem 0.75rem;
   }
 
+  .topbar__menu-btn {
+    display: flex;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
   .topbar__nav {
-    gap: 0.8rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 1rem;
+    margin-top: 3.1rem;
+    background: #fff;
+    border-bottom: 1px solid #111;
+    transform: translateY(-100%);
+    visibility: hidden;
+    transition: transform 280ms ease, visibility 280ms ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .topbar__nav.is-open {
+    transform: translateY(0);
+    visibility: visible;
+  }
+
+  .topbar__nav a {
+    padding: 0.85rem 1rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.14em;
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+    touch-action: manipulation;
   }
 
   .portfolio-lab__constellation-grid {
@@ -1328,11 +1416,67 @@ main {
   .hero {
     min-height: auto;
     padding-block: 0.85rem 1.2rem;
+    gap: 1.5rem;
+    margin-top: clamp(2rem, 6vh, 4rem);
+    margin-bottom: clamp(6rem, 14vh, 10rem);
+    grid-template-columns: 1fr;
+  }
+
+  .hero__title {
+    max-width: none;
+    font-size: clamp(2.2rem, 9vw, 4rem);
+  }
+
+  .hero__image-wrap {
+    max-width: 100%;
+  }
+
+  .btn {
+    padding: 0.85rem 1.4rem;
+    font-size: 0.72rem;
+    touch-action: manipulation;
+    min-height: 2.75rem;
+  }
+
+  .portfolio-lab {
+    padding: 2.5rem 0 2.5rem;
+  }
+
+  .portfolio-lab__layout {
+    gap: 1rem;
   }
 
   .portfolio-lab__stage,
   .portfolio-lab__panel {
-    min-height: 320px;
+    min-height: 280px;
+  }
+
+  .portfolio-lab__stage--split {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-lab__panel:first-child {
+    border-right: none;
+    border-bottom: 1px solid #111;
+  }
+
+  .portfolio-lab__nav button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    touch-action: manipulation;
+  }
+
+  .portfolio-lab__constellation-arrow {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    touch-action: manipulation;
+  }
+
+  .portfolio-lab__constellation {
+    margin-top: clamp(4rem, 10vh, 8rem);
+    padding-top: clamp(3rem, 8vh, 5rem);
   }
 
   .portfolio-lab__mode {
@@ -1341,15 +1485,36 @@ main {
 
   .portfolio-lab__mode button {
     flex: 1;
+    padding: 0.65rem 0.8rem;
+    min-height: 2.5rem;
+    touch-action: manipulation;
   }
 
   .portfolio-lab__constellation-grid {
-    grid-template-columns: 1fr;
+    gap: clamp(0.4rem, 1vw, 0.7rem);
+  }
+
+  .constellation-card__catalogue-overlay {
+    padding: 1rem;
+    font-size: 0.95rem;
   }
 
   .catalogue-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .catalogue-card__images {
+    grid-template-columns: 1fr;
+    min-height: 180px;
+  }
+
+  .catalogue-card__figure img {
+    min-height: 160px;
+  }
+
+  .catalogue-card__figure figcaption {
+    font-size: 0.6rem;
   }
 
   .catalogue-hero__actions {
@@ -1362,12 +1527,56 @@ main {
     align-items: stretch;
   }
 
+  .catalogue-guided__nav button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    touch-action: manipulation;
+  }
+
   .catalogue-toggle {
     width: 100%;
   }
 
   .catalogue-toggle button {
     flex: 1;
+    min-height: 2.5rem;
+    touch-action: manipulation;
+  }
+
+  .constellation-lightbox {
+    padding: 0.5rem;
+  }
+
+  .constellation-lightbox__figure {
+    max-width: 95vw;
+    max-height: 88vh;
+  }
+
+  .artist,
+  .contact {
+    padding: clamp(2.5rem, 8vh, 5rem) 0 1.5rem;
+  }
+
+  .artist__layout {
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    width: calc(100% - 0.75rem);
+  }
+
+  .hero__title {
+    font-size: clamp(1.9rem, 10vw, 3.5rem);
+  }
+
+  .catalogue-card__images {
+    min-height: 160px;
+  }
+
+  .catalogue-card__figure img {
+    min-height: 140px;
   }
 }
 

@@ -79,13 +79,15 @@ export default function Slideshow() {
       touchStartYRef.current = event.touches[0]?.clientY ?? null
     }
 
+    const SWIPE_THRESHOLD = 50
+
     const onTouchEnd = (event) => {
       const startY = touchStartYRef.current
       const endY = event.changedTouches[0]?.clientY
       touchStartYRef.current = null
       if (startY == null || endY == null) return
       const distance = startY - endY
-      if (Math.abs(distance) < 42) return
+      if (Math.abs(distance) < SWIPE_THRESHOLD) return
       navigateBy(distance > 0 ? 1 : -1)
     }
 
