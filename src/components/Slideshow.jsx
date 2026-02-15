@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { HeroSection, SpotlightSection, ManifestSection, ContactSection } from '../pages/Home'
 
+const SLIDE_IDS = ['hero', 'portfolio', 'artist', 'contact']
+
 export default function Slideshow() {
-  const [activeIndex, setActiveIndex] = useState(0)
   const lockUntilRef = useRef(0)
   const touchStartYRef = useRef(null)
+
+  const [activeIndex, setActiveIndex] = useState(() => {
+    if (typeof window === 'undefined') return 0
+    const hash = window.location.hash.replace('#', '')
+    const idx = SLIDE_IDS.indexOf(hash)
+    return idx >= 0 ? idx : 0
+  })
 
   useEffect(() => {
     document.body.classList.add('is-slideshow')
@@ -19,12 +27,6 @@ export default function Slideshow() {
   ]
 
   const clampIndex = (value) => Math.max(0, Math.min(slides.length - 1, value))
-
-  useEffect(() => {
-    const hash = window.location.hash.replace('#', '')
-    const initialIndex = slides.findIndex((slide) => slide.id === hash)
-    if (initialIndex >= 0) setActiveIndex(initialIndex)
-  }, [])
 
   useEffect(() => {
     const hash = `#${slides[activeIndex].id}`

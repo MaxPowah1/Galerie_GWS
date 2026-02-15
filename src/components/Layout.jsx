@@ -1,10 +1,10 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 
-const SLIDE_ANCHORS = [
-  { href: '/#portfolio', label: 'Werke' },
-  { href: '/katalog', label: 'Katalog' },
-  { href: '/#artist', label: 'Kuenstlerin' },
-  { href: '/#contact', label: 'Kontakt' },
+const NAV_ITEMS = [
+  { href: '/#portfolio-lab', label: 'Werke', isHash: true },
+  { href: '/katalog', label: 'Katalog', isHash: false },
+  { href: '/#artist', label: 'Künstlerin', isHash: true },
+  { href: '/#contact', label: 'Kontakt', isHash: true },
 ]
 
 function scrollToAnchor(e, href) {
@@ -17,28 +17,40 @@ function scrollToAnchor(e, href) {
     return
   }
   window.location.hash = hash
+  const el = document.getElementById(hash)
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 export default function Layout() {
+  const location = useLocation()
+
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a href="/#hero" className="topbar__name" onClick={(e) => scrollToAnchor(e, '/#hero')}>
-          Gabriele Wenger-Scherb
-        </a>
         <nav className="topbar__nav" aria-label="Hauptnavigation">
-          {SLIDE_ANCHORS.map(({ href, label }) => (
-            href.includes('#') ? (
-              <a key={href} href={href} onClick={(e) => scrollToAnchor(e, href)}>
+          {NAV_ITEMS.map(({ href, label, isHash }) =>
+            isHash ? (
+              <a
+                key={href}
+                href={href}
+                onClick={(e) => scrollToAnchor(e, href)}
+              >
                 {label}
               </a>
             ) : (
-              <Link key={href} to={href}>
+              <Link
+                key={href}
+                to={href}
+                className={location.pathname === href ? 'is-active' : ''}
+              >
                 {label}
               </Link>
             )
-          ))}
+          )}
         </nav>
+        <Link to="/" className="topbar__name">
+          Gabriele Wenger-Scherb
+        </Link>
       </header>
       <main>
         <Outlet />
