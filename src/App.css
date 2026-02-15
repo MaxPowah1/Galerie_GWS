@@ -605,6 +605,15 @@ main {
   font-size: 0.67rem;
 }
 
+.portfolio-lab__constellation-subline {
+  margin: 0 0 1.25rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #444;
+  letter-spacing: 0.02em;
+  max-width: 32rem;
+}
+
 .portfolio-lab__constellation-nav-wrap {
   display: flex;
   align-items: center;
@@ -647,8 +656,13 @@ main {
   gap: clamp(0.5rem, 1.2vw, 0.82rem);
 }
 
+.portfolio-lab__constellation-grid--12 {
+  max-width: min(900px, 95vw, 85vh);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .constellation-card {
-  border: 1px solid #e0e0e0;
+  border: 1px solid #111;
   background: #fff;
   padding: 0;
   text-align: left;
@@ -669,12 +683,119 @@ main {
   display: block;
 }
 
-.constellation-card span {
+.constellation-card > img + span,
+.constellation-card__caption {
   display: block;
   padding: 0.55rem 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.58rem;
+  border-top: 1px solid #111;
+}
+
+.constellation-card--catalogue {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.constellation-card--catalogue .constellation-card__img-wrap {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.constellation-card--catalogue .constellation-card__img-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.constellation-card__catalogue-overlay-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  z-index: 0;
+}
+
+.constellation-card--catalogue:hover {
+  border-color: #111;
+  transform: translateY(-2px);
+}
+
+.constellation-card--catalogue:hover .constellation-card__catalogue-overlay-bg {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.constellation-card__catalogue-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 1.25rem;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: none;
+  font-weight: 500;
+  color: #fff;
+}
+
+.constellation-card__caption {
+  display: block;
+  padding: 0.55rem 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.58rem;
+  color: #111;
+}
+
+.constellation-card--dots {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: none;
+}
+
+.constellation-card--dots:hover {
+  transform: none;
+}
+
+.constellation-card__img-wrap--dots {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  background: transparent;
+  display: block;
+}
+
+.constellation-card__dots {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
+  color: #111;
+  line-height: 1.3;
+  text-align: center;
+  padding: 1rem;
+}
+
+.constellation-card--dots:hover .constellation-card__dots {
+  text-decoration: underline;
 }
 
 .portfolio-lab__constellation-page-info {
@@ -883,6 +1004,10 @@ main {
   .portfolio-lab__constellation-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .portfolio-lab__constellation-grid--12 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 680px) {
@@ -899,6 +1024,10 @@ main {
   }
 
   .portfolio-lab__constellation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .portfolio-lab__constellation-grid--12 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

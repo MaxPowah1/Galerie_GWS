@@ -71,16 +71,11 @@ function App() {
   const [stageView, setStageView] = useState('scenario')
   const [activeIndex, setActiveIndex] = useState(0)
   const [fontIndex, setFontIndex] = useState(0)
-  const [constellationPage, setConstellationPage] = useState(0)
   const [zoomedIndex, setZoomedIndex] = useState(null)
   const currentFont = FONT_OPTIONS[fontIndex]
 
-  const ITEMS_PER_PAGE = 4
-  const totalConstellationPages = Math.ceil(paired.length / ITEMS_PER_PAGE) || 1
-  const constellationSlice = paired.slice(
-    constellationPage * ITEMS_PER_PAGE,
-    constellationPage * ITEMS_PER_PAGE + ITEMS_PER_PAGE
-  )
+  const WERKUEBERSICHT_WALL_COUNT = 10
+  const werkuebersichtWallPaintings = paired.slice(0, WERKUEBERSICHT_WALL_COUNT)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -207,11 +202,8 @@ function App() {
     })
   }, [activeIndex, paired])
 
-  const focusPainting = (index, { scrollToPortfolio = false, updateConstellation = true } = {}) => {
+  const focusPainting = (index, { scrollToPortfolio = false } = {}) => {
     setActiveIndex(index)
-    if (updateConstellation) {
-      setConstellationPage(Math.floor(index / ITEMS_PER_PAGE))
-    }
     if (scrollToPortfolio) {
       const stage = document.getElementById('portfolio-lab')
       if (stage) stage.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
@@ -281,7 +273,7 @@ function App() {
               Gabriele Wenger-Scherb
             </h1>
             <p className="hero__tagline" style={{ transform: `translate3d(0, ${parallax.heroStatement}px, 0)` }}>
-              Modern. Roh. Lebendig.
+              Galerie für zeitgenössische Malerei
             </p>
             <p className="hero__statement">
               Ich male die Welt, wie sie ist – ungefiltert und voller Farbe. Vom Chaos eines Walddickichts bis zur stillen Geometrie einer Wohnwagensiedlung in der Dämmerung: Meine Kunst feiert die Texturen des modernen Lebens und lädt zum Innehalten und genauen Hinsehen ein.
@@ -298,7 +290,7 @@ function App() {
         {activePainting && (
           <section id="portfolio-lab" className="portfolio-lab">
             <div className="section-head" data-reveal="up">
-              <p className="section-label">Portfolio</p>
+              <p className="section-label">Impressionen</p>
               <p className="section-note">
                 Werke durchblättern (Bild links/rechts anklicken oder Pfeiltasten), Perspektiven wechseln und eine eigene Reihenfolge entdecken.
               </p>
@@ -398,7 +390,7 @@ function App() {
                     <button
                       key={`${work.id}-${offset}`}
                       type="button"
-                      onClick={() => focusPainting(index, { updateConstellation: false })}
+                      onClick={() => focusPainting(index)}
                       className={`orbit-node${offset === 0 ? ' is-active' : ''}`}
                       style={{ '--depth': Math.abs(offset) }}
                       aria-label={`${work.title} auswählen`}
@@ -413,49 +405,53 @@ function App() {
 
             <div className="portfolio-lab__constellation" data-reveal="up" data-reveal-delay="120">
               <p className="portfolio-lab__constellation-title">Werkübersicht</p>
-              <div className="portfolio-lab__constellation-nav-wrap">
-                <button
-                  type="button"
-                  className="portfolio-lab__constellation-arrow"
-                  onClick={() => setConstellationPage((p) => Math.max(0, p - 1))}
-                  disabled={constellationPage === 0}
-                  aria-label="Vorherige 4 Werke"
-                >
-                  ‹
-                </button>
-                <div className="portfolio-lab__constellation-grid">
-                  {constellationSlice.map((art, idx) => {
-                    const index = constellationPage * ITEMS_PER_PAGE + idx
-                    const imgSrc = index % 2 === 0 ? art.scenarioSrc : art.wallSrc
-                    return (
-                      <button
-                        key={art.id}
-                        type="button"
-                        onClick={() => {
-                          focusPainting(index)
-                          setZoomedIndex(index)
-                        }}
-                        className={`constellation-card${index === activeIndex ? ' is-active' : ''}`}
-                      >
-                        <img src={imgSrc} alt={`${art.title} Vorschau`} loading="lazy" />
-                        <span>{art.title}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-                <button
-                  type="button"
-                  className="portfolio-lab__constellation-arrow"
-                  onClick={() => setConstellationPage((p) => Math.min(totalConstellationPages - 1, p + 1))}
-                  disabled={constellationPage >= totalConstellationPages - 1}
-                  aria-label="Nächste 4 Werke"
-                >
-                  ›
-                </button>
-              </div>
-              <p className="portfolio-lab__constellation-page-info">
-                Seite {constellationPage + 1} von {totalConstellationPages}
+              <p className="portfolio-lab__constellation-subline">
+                Eine Auswahl meiner Arbeiten. Die vollständige Werkschau finden Sie im Katalog.
               </p>
+              <div className="portfolio-lab__constellation-nav-wrap">
+                <div className="portfolio-lab__constellation-grid portfolio-lab__constellation-grid--12">
+                  {werkuebersichtWallPaintings.map((art, index) => (
+                    <button
+                      key={art.id}
+                      type="button"
+                      onClick={() => {
+                        focusPainting(index)
+                        setZoomedIndex(index)
+                      }}
+                      className={`constellation-card${index === activeIndex ? ' is-active' : ''}`}
+                    >
+                      <img src={art.wallSrc} alt={`${art.title} Vorschau`} loading="lazy" />
+                      <span>{art.title}</span>
+                    </button>
+                  ))}
+                  {(paired.length >= 12 ? paired.slice(10, 11) : paired.slice(-2, -1)).map((art) => (
+                    <a
+                      key="catalogue"
+                      href="/katalog"
+                      className="constellation-card constellation-card--catalogue"
+                      aria-label="Im Katalog finden Sie eine komplette Übersicht aller Bilder"
+                    >
+                      <span className="constellation-card__img-wrap">
+                        <img src={art.wallSrc} alt="" loading="lazy" />
+                        <span className="constellation-card__catalogue-overlay-bg" aria-hidden="true" />
+                        <span className="constellation-card__catalogue-overlay">
+                          Im Katalog finden Sie eine komplette Übersicht aller Bilder
+                        </span>
+                      </span>
+                      <span className="constellation-card__caption">Zum Katalog</span>
+                    </a>
+                  ))}
+                  <a
+                    href="/katalog"
+                    className="constellation-card constellation-card--dots"
+                    aria-label="Zum Katalog"
+                  >
+                    <span className="constellation-card__img-wrap constellation-card__img-wrap--dots">
+                      <span className="constellation-card__dots">Zum Katalog …</span>
+                    </span>
+                  </a>
+                </div>
+              </div>
             </div>
           </section>
         )}
