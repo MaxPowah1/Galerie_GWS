@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useSplash } from '../context/SplashContext'
 import artistPhoto from '../assets/Artist/Artist_foto.png'
 import artistPhotoPose2 from '../assets/Artist/Artist_pose_2.png'
 import { paintings } from '../data/paintings'
@@ -10,6 +11,7 @@ function wrapIndex(index, length) {
 }
 
 export default function Home() {
+  const { setSplashDone } = useSplash()
   const paired = paintings
   const [scrollY, setScrollY] = useState(0)
   const [reduceMotion, setReduceMotion] = useState(false)
@@ -35,12 +37,15 @@ export default function Home() {
     const visibleDuration = 8200
     const fadeDuration = 1400
     const hideTimer = window.setTimeout(() => setSplashClosing(true), visibleDuration)
-    const cleanupTimer = window.setTimeout(() => setShowSplash(false), visibleDuration + fadeDuration)
+    const cleanupTimer = window.setTimeout(() => {
+      setShowSplash(false)
+      setSplashDone(true)
+    }, visibleDuration + fadeDuration)
     return () => {
       window.clearTimeout(hideTimer)
       window.clearTimeout(cleanupTimer)
     }
-  }, [reduceMotion, showSplash])
+  }, [reduceMotion, showSplash, setSplashDone])
 
   useEffect(() => {
     let ticking = false
@@ -132,6 +137,13 @@ export default function Home() {
     }
   }, [showSplash, zoomedIndex])
 
+  useEffect(() => {
+    document.body.classList.toggle('splash-active', showSplash)
+    return () => {
+      document.body.classList.remove('splash-active')
+    }
+  }, [showSplash])
+
   const parallax = useMemo(() => {
     if (reduceMotion) {
       return { heroHeadline: 0, heroStatement: 0 }
@@ -189,6 +201,11 @@ export default function Home() {
     }
   }
 
+  const jumpToPortfolio = () => {
+    const section = document.getElementById('portfolio-lab')
+    if (section) section.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+  }
+
   const signaturePath = 'M80 100 C 200 100, 280 40, 380 80 C 420 100, 380 140, 320 120 C 260 100, 300 60, 420 60 C 580 60, 700 80, 820 90'
 
   return (
@@ -229,9 +246,9 @@ export default function Home() {
           <p className="hero__statement">
             Ich male die Welt, wie sie ist – ungefiltert und voller Farbe. Vom Chaos eines Walddickichts bis zur stillen Geometrie einer Wohnwagensiedlung in der Dämmerung: Meine Kunst feiert die Texturen des modernen Lebens und lädt zum Innehalten und genauen Hinsehen ein.
           </p>
-          <a href="#portfolio-lab" className="btn btn--dark" data-reveal="up" data-reveal-delay="180">
+          <button type="button" className="btn btn--dark" data-reveal="up" data-reveal-delay="180" onClick={jumpToPortfolio}>
             Zu den Werken
-          </a>
+          </button>
         </div>
         <figure className="hero__image-wrap" data-reveal="right">
           <img src={artistPhoto} alt="Gabriele Wenger-Scherb, Künstlerin" className="hero__image" />

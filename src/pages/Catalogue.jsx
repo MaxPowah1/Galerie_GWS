@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { paintings } from '../data/paintings'
 
 export default function Catalogue() {
+  const navigate = useNavigate()
   const [viewMode, setViewMode] = useState('split')
   const total = paintings.length
+
+  const goToGallery = () => {
+    navigate('/', { state: { scrollTo: 'portfolio-lab' } })
+  }
 
   useEffect(() => {
     const items = document.querySelectorAll('[data-catalogue-reveal]')
@@ -36,9 +41,9 @@ export default function Catalogue() {
             Entdecken Sie die vollständige Werkschau. Jedes Gemälde in zwei Perspektiven: im Raum und an der Wand.
           </p>
           <div className="catalogue-hero__actions">
-            <Link to="/#portfolio-lab" className="btn btn--dark catalogue-hero__cta">
+            <button type="button" className="btn btn--dark catalogue-hero__cta" onClick={goToGallery}>
               Zurück zur Galerie
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -130,9 +135,9 @@ export default function Catalogue() {
 
       <footer className="catalogue-footer" data-catalogue-reveal>
         <p className="catalogue-footer__text">{total} Werke in dieser Sammlung.</p>
-        <Link to="/#portfolio-lab" className="btn btn--dark">
+        <button type="button" className="btn btn--dark" onClick={goToGallery}>
           Zurück zur Galerie
-        </Link>
+        </button>
       </footer>
     </div>
   )

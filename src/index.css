@@ -9,7 +9,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #111;
-  background: #fff;
+  background: #f7f7f6;
 }
 
 *,
@@ -20,12 +20,12 @@
 
 html {
   scroll-behavior: smooth;
-  background: #fff;
+  background: #f7f7f6;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: #fff;
+  background: #f7f7f6;
   letter-spacing: 0.02em;
 }

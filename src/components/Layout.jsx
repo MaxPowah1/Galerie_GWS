@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useSplash } from '../context/SplashContext'
 
 const NAV_ITEMS = [
   { href: '/#portfolio-lab', label: 'Werke', isHash: true },
@@ -8,22 +9,20 @@ const NAV_ITEMS = [
   { href: '/#contact', label: 'Kontakt', isHash: true },
 ]
 
-function scrollToAnchor(e, href) {
-  if (!href.includes('#')) return
-  e.preventDefault()
-  const hash = href.split('#')[1]
-  if (!hash) return
-  if (window.location.pathname !== '/') {
-    window.location.href = href
-    return
-  }
-  window.location.hash = hash
-  const el = document.getElementById(hash)
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+function getSectionId(href) {
+  if (!href.includes('#')) return ''
+  return href.split('#')[1] || ''
+}
+
+function scrollToSection(sectionId, behavior = 'smooth') {
+  const el = document.getElementById(sectionId)
+  if (el) el.scrollIntoView({ behavior, block: 'start' })
 }
 
 export default function Layout() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { splashVisible } = useSplash()
   const [menuOpen, setMenuOpen] = useState(false)
 
   const closeMenu = () => setMenuOpen(false)
@@ -37,13 +36,30 @@ export default function Layout() {
     return () => mq.removeEventListener('change', handleResize)
   }, [])
 
+  useEffect(() => {
+    const sectionId = location.state?.scrollTo
+    if (location.pathname !== '/' || !sectionId) return
+    const rafId = window.requestAnimationFrame(() => scrollToSection(sectionId))
+    navigate(location.pathname, { replace: true, state: null })
+    return () => window.cancelAnimationFrame(rafId)
+  }, [location.pathname, location.state, navigate])
+
   const handleNavClick = (e, href, isHash) => {
     closeMenu()
-    if (isHash) scrollToAnchor(e, href)
+    if (!isHash) return
+    e.preventDefault()
+    const sectionId = getSectionId(href)
+    if (!sectionId) return
+    if (location.pathname !== '/') {
+      navigate('/', { state: { scrollTo: sectionId } })
+      return
+    }
+    scrollToSection(sectionId)
   }
 
   return (
     <div className="site-shell">
+      {!splashVisible && (
       <header className="topbar">
         <button
           type="button"
@@ -95,6 +111,7 @@ export default function Layout() {
           Gabriele Wenger-Scherb
         </Link>
       </header>
+      )}
       <main>
         <Outlet />
       </main>
