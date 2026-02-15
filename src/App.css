@@ -193,7 +193,9 @@ h6,
 .hero__tagline,
 .section-label,
 .portfolio-lab__index,
-.portfolio-lab__constellation-title {
+.portfolio-lab__constellation-title,
+.constellation-card__caption,
+.constellation-card__dots {
   font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
   font-weight: 300;
 }
@@ -371,7 +373,7 @@ main {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.19em;
-  font-size: 0.66rem;
+  font-size: 0.82rem;
 }
 
 .section-note {
@@ -602,7 +604,7 @@ main {
   margin: 0 0 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.67rem;
+  font-size: 0.82rem;
 }
 
 .portfolio-lab__constellation-subline {

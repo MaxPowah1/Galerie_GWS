@@ -316,15 +316,6 @@ function App() {
                   >
                     Diptychon
                   </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={stageView === 'wall'}
-                    className={stageView === 'wall' ? 'is-active' : ''}
-                    onClick={() => setStageView('wall')}
-                  >
-                    Präsenz
-                  </button>
                 </div>
 
                 {stageView === 'split' ? (
@@ -353,8 +344,8 @@ function App() {
                     aria-label="Links: vorheriges Werk, Rechts: nächstes Werk"
                   >
                     <img
-                      src={stageView === 'scenario' ? activePainting.scenarioSrc : activePainting.wallSrc}
-                      alt={`${activePainting.title} ${stageView === 'scenario' ? 'im Kontext' : 'an der Wand'}`}
+                      src={activePainting.scenarioSrc}
+                      alt={`${activePainting.title} im Kontext`}
                     />
                   </div>
                 )}
@@ -380,9 +371,7 @@ function App() {
                 <p className="portfolio-lab__description">
                   {stageView === 'split'
                     ? 'Zwei Realitäten zugleich: Atmosphäre im Raum und architektonische Präsenz.'
-                    : stageView === 'scenario'
-                      ? 'Das Werk in seinem Kontext – Licht und Distanz prägen die Lesart.'
-                      : 'Das Bild tritt dem Raum direkt gegenüber, Materialität und Kanten stehen im Vordergrund.'}
+                    : 'Das Werk in seinem Kontext – Licht und Distanz prägen die Lesart.'}
                 </p>
 
                 <div className="portfolio-lab__orbit" aria-label="Benachbarte Werke">
@@ -395,7 +384,7 @@ function App() {
                       style={{ '--depth': Math.abs(offset) }}
                       aria-label={`${work.title} auswählen`}
                     >
-                      <img src={work.wallSrc} alt="" aria-hidden="true" loading="lazy" />
+                      <img src={work.scenarioSrc} alt="" aria-hidden="true" loading="lazy" />
                       <span>{work.title}</span>
                     </button>
                   ))}
@@ -438,7 +427,7 @@ function App() {
                           Im Katalog finden Sie eine komplette Übersicht aller Bilder
                         </span>
                       </span>
-                      <span className="constellation-card__caption">Zum Katalog</span>
+                      <span className="constellation-card__caption">zum Katalog →</span>
                     </a>
                   ))}
                   <a
@@ -447,7 +436,7 @@ function App() {
                     aria-label="Zum Katalog"
                   >
                     <span className="constellation-card__img-wrap constellation-card__img-wrap--dots">
-                      <span className="constellation-card__dots">Zum Katalog …</span>
+                      <span className="constellation-card__dots">zum Katalog →</span>
                     </span>
                   </a>
                 </div>
@@ -516,7 +505,7 @@ function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <img
-              src={zoomedIndex % 2 === 0 ? paired[zoomedIndex].scenarioSrc : paired[zoomedIndex].wallSrc}
+              src={paired[zoomedIndex].wallSrc}
               alt={`${paired[zoomedIndex].title} vergrößert`}
             />
             <figcaption>{paired[zoomedIndex].title}</figcaption>
