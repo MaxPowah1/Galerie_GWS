@@ -20,13 +20,80 @@ export default function Home() {
   const [stageView, setStageView] = useState('scenario')
   const [activeIndex, setActiveIndex] = useState(0)
   const [zoomedIndex, setZoomedIndex] = useState(null)
+  const [isMobilePortfolio, setIsMobilePortfolio] = useState(false)
+  const [activeLegalPopup, setActiveLegalPopup] = useState(null)
+  const [footerVisible, setFooterVisible] = useState(false)
+  const footerSentinelRef = useRef(null)
 
   const WERKUEBERSICHT_WALL_COUNT = 10
   const werkuebersichtWallPaintings = paired.slice(0, WERKUEBERSICHT_WALL_COUNT)
+  const legalPopups = {
+    imprint: {
+      label: 'Impressum',
+      title: 'Impressum',
+      content: (
+        <>
+          <p>
+            Angaben gemaess Paragraph 5 TMG. Bitte ergaenzen:
+          </p>
+          <p>
+            Name / Unternehmen
+            <br />
+            Strasse + Hausnummer
+            <br />
+            PLZ + Ort
+            <br />
+            E-Mail: studio@example.com
+          </p>
+        </>
+      ),
+    },
+    privacy: {
+      label: 'Datenschutz',
+      title: 'Datenschutzerklaerung',
+      content: (
+        <>
+          <p>
+            Diese Website verarbeitet personenbezogene Daten nur im erforderlichen Umfang (z. B. Server-Logs, Kontaktanfragen per E-Mail).
+          </p>
+          <p>
+            Ergaenzen Sie hier Informationen zu Verantwortlichen, Rechtsgrundlagen, Speicherdauer und Betroffenenrechten gemaess DSGVO.
+          </p>
+        </>
+      ),
+    },
+    terms: {
+      label: 'Nutzungsbedingungen',
+      title: 'Nutzungsbedingungen',
+      content: (
+        <p>
+          Inhalte dieser Website dienen der Information. Urheberrechte und Nutzungsrechte an Texten und Bildern verbleiben bei der Urheberin, sofern nicht anders angegeben.
+        </p>
+      ),
+    },
+    cookies: {
+      label: 'Cookie-Hinweis',
+      title: 'Cookie-Hinweis',
+      content: (
+        <p>
+          Aktuell werden nur technisch notwendige Cookies eingesetzt. Falls Analyse- oder Marketing-Cookies verwendet werden, bitte hier die Einwilligungs- und Widerrufsmoeglichkeiten ergaenzen.
+        </p>
+      ),
+    },
+  }
+  const activeLegalContent = activeLegalPopup ? legalPopups[activeLegalPopup] : null
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
     const onMediaChange = () => setReduceMotion(mediaQuery.matches)
+    onMediaChange()
+    mediaQuery.addEventListener('change', onMediaChange)
+    return () => mediaQuery.removeEventListener('change', onMediaChange)
+  }, [])
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 680px)')
+    const onMediaChange = () => setIsMobilePortfolio(mediaQuery.matches)
     onMediaChange()
     mediaQuery.addEventListener('change', onMediaChange)
     return () => mediaQuery.removeEventListener('change', onMediaChange)
@@ -74,12 +141,29 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    const sections = Array.from(document.querySelectorAll('main section'))
+    const sentinel = footerSentinelRef.current
+    if (!sentinel) return undefined
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setFooterVisible(entry.isIntersecting)
+        })
+      },
+      { threshold: 0.1, rootMargin: '0px 0px 0px 0px' },
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const sections = Array.from(document.querySelectorAll('main section, main footer'))
     const revealItems = []
     const sequenceStepMs = 220
 
     sections.forEach((section) => {
-      const sectionItems = Array.from(section.querySelectorAll('[data-reveal]'))
+      const sectionItems = section.matches('[data-reveal]')
+        ? [section, ...Array.from(section.querySelectorAll('[data-reveal]'))]
+        : Array.from(section.querySelectorAll('[data-reveal]'))
       sectionItems.forEach((el, idx) => {
         const baseDelay = Number(el.getAttribute('data-reveal-delay')) || 0
         const sequencedDelay = baseDelay + idx * sequenceStepMs
@@ -121,6 +205,7 @@ export default function Home() {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') {
         setZoomedIndex(null)
+        setActiveLegalPopup(null)
         return
       }
       if (zoomedIndex !== null) return
@@ -223,8 +308,9 @@ export default function Home() {
       {showSplash && (
         <div className={`splash-screen${splashClosing ? ' is-leaving' : ''}`} aria-hidden="true">
           <div className="splash-screen__composition">
+            <p className="splash-screen__label">Atelier</p>
             <p className="splash-screen__title">Gabriele Wenger-Scherb</p>
-            <svg className="splash-screen__signature" viewBox="0 0 900 220" role="presentation" focusable="false">
+            <svg className="splash-screen__signature" viewBox="70 30 760 130" role="presentation" focusable="false">
               <path pathLength="2200" d={signaturePath} />
               <circle className="splash-screen__pen" r="3.6" cx="-999" cy="-999">
                 <animateMotion
@@ -270,7 +356,9 @@ export default function Home() {
           <div className="section-head" data-reveal="up">
             <p className="section-label">Impressionen</p>
             <p className="section-note">
-              Werke durchblättern (Bild links/rechts anklicken oder Pfeiltasten), Perspektiven wechseln und eine eigene Reihenfolge entdecken.
+              {isMobilePortfolio
+                ? 'Durch die Werke wischen, Details vergleichen und direkt eine Arbeit aus der Mini-Galerie unten waehlen.'
+                : 'Werke durchblaettern (Bild links/rechts anklicken oder Pfeiltasten), Perspektiven wechseln und eine eigene Reihenfolge entdecken.'}
             </p>
           </div>
           <div className="portfolio-lab__layout" data-reveal="scale" data-reveal-delay="80">
@@ -343,45 +431,83 @@ export default function Home() {
               )}
             </div>
 
-            <aside className="portfolio-lab__meta">
-              <div className="portfolio-lab__meta-header">
-                <span className="portfolio-lab__index">
-                  {String(activeIndex + 1).padStart(2, '0')} / {String(paired.length).padStart(2, '0')}
-                </span>
-                <h3 className="portfolio-lab__title">{activePainting.title}</h3>
-              </div>
-
-              <div className="portfolio-lab__nav">
-                <button type="button" onClick={showPrevious} aria-label="Vorheriges Werk">
-                  ←
-                </button>
-                <button type="button" onClick={showNext} aria-label="Nächstes Werk">
-                  →
-                </button>
-              </div>
-
-              <p className="portfolio-lab__description">
-                {stageView === 'split'
-                  ? 'Zwei Realitäten zugleich: Atmosphäre im Raum und architektonische Präsenz.'
-                  : 'Das Werk in seinem Kontext – Licht und Distanz prägen die Lesart.'}
-              </p>
-
-              <div className="portfolio-lab__orbit" aria-label="Benachbarte Werke">
-                {orbitSlots.map(({ offset, index, work }) => (
-                  <button
-                    key={`${work.id}-${offset}`}
-                    type="button"
-                    onClick={() => focusPainting(index)}
-                    className={`orbit-node${offset === 0 ? ' is-active' : ''}`}
-                    style={{ '--depth': Math.abs(offset) }}
-                    aria-label={`${work.title} auswählen`}
-                  >
-                    <img src={work.scenarioSrc} alt="" aria-hidden="true" loading="lazy" />
-                    <span>{work.title}</span>
+            {isMobilePortfolio ? (
+              <aside className="portfolio-lab__meta portfolio-lab__meta--mobile">
+                <div className="portfolio-lab__meta-header">
+                  <span className="portfolio-lab__index">
+                    {String(activeIndex + 1).padStart(2, '0')} / {String(paired.length).padStart(2, '0')}
+                  </span>
+                  <h3 className="portfolio-lab__title">{activePainting.title}</h3>
+                </div>
+                <div className="portfolio-lab__nav portfolio-lab__nav--mobile">
+                  <button type="button" onClick={showPrevious} aria-label="Vorheriges Werk">
+                    Vorheriges
                   </button>
-                ))}
-              </div>
-            </aside>
+                  <button type="button" onClick={showNext} aria-label="Naechstes Werk">
+                    Naechstes
+                  </button>
+                </div>
+                <p className="portfolio-lab__description">
+                  {stageView === 'split'
+                    ? 'Zwei Ansichten im direkten Vergleich: Umgebung und Wandwirkung auf einen Blick.'
+                    : 'Das Werk im Raum: Licht, Abstand und Umgebung veraendern die Wirkung sichtbar.'}
+                </p>
+                <div className="portfolio-lab__mobile-strip" aria-label="Alle Werke">
+                  {paired.map((work, index) => (
+                    <button
+                      key={work.id}
+                      type="button"
+                      onClick={() => focusPainting(index)}
+                      className={`portfolio-lab__mobile-thumb${index === activeIndex ? ' is-active' : ''}`}
+                      aria-label={`${work.title} auswaehlen`}
+                    >
+                      <img src={work.scenarioSrc} alt="" aria-hidden="true" loading="lazy" />
+                      <span>{work.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </aside>
+            ) : (
+              <aside className="portfolio-lab__meta">
+                <div className="portfolio-lab__meta-header">
+                  <span className="portfolio-lab__index">
+                    {String(activeIndex + 1).padStart(2, '0')} / {String(paired.length).padStart(2, '0')}
+                  </span>
+                  <h3 className="portfolio-lab__title">{activePainting.title}</h3>
+                </div>
+
+                <div className="portfolio-lab__nav">
+                  <button type="button" onClick={showPrevious} aria-label="Vorheriges Werk">
+                    ←
+                  </button>
+                  <button type="button" onClick={showNext} aria-label="Nächstes Werk">
+                    →
+                  </button>
+                </div>
+
+                <p className="portfolio-lab__description">
+                  {stageView === 'split'
+                    ? 'Zwei Realitäten zugleich: Atmosphäre im Raum und architektonische Präsenz.'
+                    : 'Das Werk in seinem Kontext – Licht und Distanz prägen die Lesart.'}
+                </p>
+
+                <div className="portfolio-lab__orbit" aria-label="Benachbarte Werke">
+                  {orbitSlots.map(({ offset, index, work }) => (
+                    <button
+                      key={`${work.id}-${offset}`}
+                      type="button"
+                      onClick={() => focusPainting(index)}
+                      className={`orbit-node${offset === 0 ? ' is-active' : ''}`}
+                      style={{ '--depth': Math.abs(offset) }}
+                      aria-label={`${work.title} auswählen`}
+                    >
+                      <img src={work.scenarioSrc} alt="" aria-hidden="true" loading="lazy" />
+                      <span>{work.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </aside>
+            )}
           </div>
 
           <div className="portfolio-lab__constellation" data-reveal="up" data-reveal-delay="120">
@@ -480,6 +606,62 @@ export default function Home() {
           </a>
         </div>
       </section>
+
+      <div ref={footerSentinelRef} className="site-footer__sentinel" aria-hidden="true" />
+
+      <footer
+        className={`site-footer${footerVisible ? ' is-visible' : ''}`}
+        aria-label="Rechtliche Informationen"
+      >
+        <p className="site-footer__copyright">
+          © {new Date().getFullYear()} Gabriele Wenger-Scherb
+        </p>
+        <nav className="site-footer__links" aria-label="Rechtliche Links">
+          {Object.entries(legalPopups).map(([key, item]) => (
+            <button
+              key={key}
+              type="button"
+              className="site-footer__link"
+              onClick={() => setActiveLegalPopup(key)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+      </footer>
+
+      {activeLegalContent && (
+        <div
+          className="legal-popup"
+          onClick={() => setActiveLegalPopup(null)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && setActiveLegalPopup(null)}
+          aria-label="Rechtlichen Hinweis schliessen"
+        >
+          <div className="legal-popup__backdrop" />
+          <article
+            className="legal-popup__panel"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="legal-popup-title"
+          >
+            <header className="legal-popup__header">
+              <h3 id="legal-popup-title">{activeLegalContent.title}</h3>
+              <button
+                type="button"
+                className="legal-popup__close"
+                onClick={() => setActiveLegalPopup(null)}
+                aria-label="Popup schliessen"
+              >
+                X
+              </button>
+            </header>
+            <div className="legal-popup__content">{activeLegalContent.content}</div>
+          </article>
+        </div>
+      )}
 
       {zoomedIndex !== null && paired[zoomedIndex] && (
         <div
