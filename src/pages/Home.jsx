@@ -11,11 +11,11 @@ function wrapIndex(index, length) {
 }
 
 export default function Home() {
-  const { setSplashDone } = useSplash()
+  const { splashVisible, setSplashDone } = useSplash()
   const paired = paintings
   const [scrollY, setScrollY] = useState(0)
   const [reduceMotion, setReduceMotion] = useState(false)
-  const [showSplash, setShowSplash] = useState(true)
+  const [showSplash, setShowSplash] = useState(splashVisible)
   const [splashClosing, setSplashClosing] = useState(false)
   const [stageView, setStageView] = useState('scenario')
   const [activeIndex, setActiveIndex] = useState(0)
@@ -31,6 +31,16 @@ export default function Home() {
     mediaQuery.addEventListener('change', onMediaChange)
     return () => mediaQuery.removeEventListener('change', onMediaChange)
   }, [])
+
+  useEffect(() => {
+    if (!splashVisible) {
+      setShowSplash(false)
+      setSplashClosing(false)
+      return
+    }
+    setShowSplash(true)
+    setSplashClosing(false)
+  }, [splashVisible])
 
   useEffect(() => {
     if (!showSplash) return undefined
