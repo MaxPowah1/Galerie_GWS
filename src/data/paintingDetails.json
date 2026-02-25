@@ -1,0 +1,104 @@
+[
+  {
+    "number": 1,
+    "priceCategory": "A",
+    "technique": "Öl auf Leinwand",
+    "dimensions": { "widthCm": 80, "heightCm": 100 }
+  },
+  {
+    "number": 2,
+    "priceCategory": "B",
+    "technique": "Acryl auf Leinwand",
+    "dimensions": { "widthCm": 90, "heightCm": 120 }
+  },
+  {
+    "number": 3,
+    "priceCategory": "A",
+    "technique": "Mischtechnik auf Leinwand",
+    "dimensions": { "widthCm": 70, "heightCm": 90 }
+  },
+  {
+    "number": 4,
+    "priceCategory": "C",
+    "technique": "Öl auf Holz",
+    "dimensions": { "widthCm": 60, "heightCm": 80 }
+  },
+  {
+    "number": 5,
+    "priceCategory": "B",
+    "technique": "Acryl auf Leinwand",
+    "dimensions": { "widthCm": 100, "heightCm": 140 }
+  },
+  {
+    "number": 6,
+    "priceCategory": "A",
+    "technique": "Öl auf Leinwand",
+    "dimensions": { "widthCm": 75, "heightCm": 95 }
+  },
+  {
+    "number": 7,
+    "priceCategory": "C",
+    "technique": "Mischtechnik auf Leinwand",
+    "dimensions": { "widthCm": 110, "heightCm": 150 }
+  },
+  {
+    "number": 8,
+    "priceCategory": "B",
+    "technique": "Acryl auf Holz",
+    "dimensions": { "widthCm": 65, "heightCm": 85 }
+  },
+  {
+    "number": 9,
+    "priceCategory": "A",
+    "technique": "Öl auf Leinwand",
+    "dimensions": { "widthCm": 85, "heightCm": 110 }
+  },
+  {
+    "number": 10,
+    "priceCategory": "D",
+    "technique": "Mischtechnik auf Leinwand",
+    "dimensions": { "widthCm": 120, "heightCm": 160 }
+  },
+  {
+    "number": 11,
+    "priceCategory": "B",
+    "technique": "Acryl auf Leinwand",
+    "dimensions": { "widthCm": 95, "heightCm": 125 }
+  },
+  {
+    "number": 12,
+    "priceCategory": "A",
+    "technique": "Öl auf Leinwand",
+    "dimensions": { "widthCm": 80, "heightCm": 100 }
+  },
+  {
+    "number": 13,
+    "priceCategory": "C",
+    "technique": "Öl auf Leinwand",
+    "dimensions": { "widthCm": 100, "heightCm": 130 }
+  },
+  {
+    "number": 14,
+    "priceCategory": "B",
+    "technique": "Acryl auf Leinwand",
+    "dimensions": { "widthCm": 90, "heightCm": 110 }
+  },
+  {
+    "number": 15,
+    "priceCategory": "A",
+    "technique": "Mischtechnik auf Leinwand",
+    "dimensions": { "widthCm": 70, "heightCm": 100 }
+  },
+  {
+    "number": 16,
+    "priceCategory": "D",
+    "technique": "Öl auf Leinwand",
+    "dimensions": { "widthCm": 120, "heightCm": 180 }
+  },
+  {
+    "number": 17,
+    "priceCategory": "C",
+    "technique": "Acryl auf Holz",
+    "dimensions": { "widthCm": 60, "heightCm": 90 }
+  }
+]

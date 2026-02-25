@@ -987,6 +987,135 @@ main {
   color: #333;
 }
 
+/* Catalogue lightbox (enlarged view with view toggle) */
+.catalogue-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  cursor: pointer;
+}
+
+.catalogue-lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.catalogue-lightbox__panel {
+  position: relative;
+  z-index: 1;
+  width: min(95vw, 900px);
+  max-width: 95vw;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  cursor: default;
+}
+
+.catalogue-lightbox__view-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.25rem;
+  width: 100%;
+  max-width: 18rem;
+}
+
+.catalogue-lightbox__view-toggle button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: #fff;
+  border: 1px solid #111;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.catalogue-lightbox__view-toggle button:hover {
+  background: #f0f0f0;
+}
+
+.catalogue-lightbox__view-toggle button.is-active {
+  background: #111;
+  color: #fff;
+}
+
+.catalogue-lightbox__content {
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: auto;
+  cursor: pointer;
+}
+
+.catalogue-lightbox__figure {
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  background: #fff;
+}
+
+.catalogue-lightbox__figure img {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  background: #fff;
+}
+
+.catalogue-lightbox__figure figcaption {
+  padding: 0.5rem 0.75rem;
+  background: #fafafa;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #555;
+  border-top: 1px solid #e8e8e8;
+}
+
+.catalogue-lightbox__diptychon {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  max-width: 90vw;
+}
+
+.catalogue-lightbox__diptychon .catalogue-lightbox__figure img {
+  max-height: 60vh;
+}
+
+.catalogue-lightbox__close {
+  position: fixed;
+  top: 5rem;
+  right: 2rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1rem;
+  line-height: 1;
+  background: #fff;
+  border: 1px solid #111;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.catalogue-lightbox__close:hover {
+  background: #111;
+  color: #fff;
+}
+
 .spotlight {
   padding: clamp(12rem, 24vh, 18rem) 0;
 }
@@ -1467,7 +1596,8 @@ main {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  min-height: 200px;
+  aspect-ratio: 1;
+  cursor: pointer;
 }
 
 .catalogue-card__figure {
@@ -1482,7 +1612,6 @@ main {
 .catalogue-card__figure img {
   width: 100%;
   height: 100%;
-  min-height: 200px;
   object-fit: cover;
   display: block;
 }
@@ -1502,13 +1631,19 @@ main {
   border-top: 1px solid #111;
 }
 
+.catalogue-card__headline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
 .catalogue-card__index {
-  display: block;
+  display: inline-block;
   font-size: 0.65rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #666;
-  margin-bottom: 0.35rem;
 }
 
 .catalogue-card__title {
@@ -1516,6 +1651,37 @@ main {
   font-size: 1rem;
   font-weight: 400;
   letter-spacing: 0.05em;
+}
+
+.catalogue-card__details {
+  margin: 0.65rem 0 0;
+  padding: 0.65rem 0 0;
+  border-top: 1px solid #ececec;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.catalogue-card__detail-row {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.45rem;
+  align-items: baseline;
+}
+
+.catalogue-card__detail-row dt {
+  margin: 0;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #666;
+}
+
+.catalogue-card__detail-row dd {
+  margin: 0;
+  font-size: 0.73rem;
+  color: #222;
+  line-height: 1.4;
 }
 
 .catalogue-footer {
@@ -1801,11 +1967,6 @@ main {
 
   .catalogue-card__images {
     grid-template-columns: 1fr;
-    min-height: 180px;
-  }
-
-  .catalogue-card__figure img {
-    min-height: 160px;
   }
 
   .catalogue-card__figure figcaption {
@@ -1847,6 +2008,28 @@ main {
     max-height: 88vh;
   }
 
+  .catalogue-lightbox {
+    padding: 1rem;
+  }
+
+  .catalogue-lightbox__diptychon {
+    grid-template-columns: 1fr;
+    max-height: 70vh;
+    overflow: auto;
+  }
+
+  .catalogue-lightbox__diptychon .catalogue-lightbox__figure img {
+    max-height: 45vh;
+  }
+
+  .catalogue-lightbox__close {
+    top: 4.5rem;
+    right: 1rem;
+    width: 1.35rem;
+    height: 1.35rem;
+    font-size: 0.9rem;
+  }
+
   .artist,
   .contact {
     padding: clamp(2.5rem, 8vh, 5rem) 0 1.5rem;
@@ -1881,13 +2064,6 @@ main {
     font-size: clamp(1.9rem, 10vw, 3.5rem);
   }
 
-  .catalogue-card__images {
-    min-height: 160px;
-  }
-
-  .catalogue-card__figure img {
-    min-height: 140px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

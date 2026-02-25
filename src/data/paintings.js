@@ -1,3 +1,5 @@
+import paintingDetails from './paintingDetails.json'
+
 // Load scenario images (in-situ) and wall images (frontal on wall)
 // Paths relative to this file
 const szenarioModules = import.meta.glob('../assets/Szenarios/*.{jpg,jpeg,png,webp}', {
@@ -8,6 +10,11 @@ const wallModules = import.meta.glob('../assets/painting_on_wall/*.{jpg,jpeg,png
   eager: true,
   import: 'default',
 })
+
+const detailsByNumber = paintingDetails.reduce((acc, detail) => {
+  if (typeof detail.number === 'number') acc[detail.number] = detail
+  return acc
+}, {})
 
 /** Extract numeric base name from path, e.g. "../assets/Szenarios/1.png" -> 1 */
 function baseName(path) {
@@ -31,13 +38,23 @@ function buildPaintings() {
   const numbers = [...new Set([...Object.keys(szenarios).map(Number), ...Object.keys(walls).map(Number)])].sort((a, b) => a - b)
   return numbers
     .filter((n) => szenarios[n] && walls[n])
-    .map((n, index) => ({
-      id: index + 1,
-      number: n,
-      scenarioSrc: szenarios[n],
-      wallSrc: walls[n],
-      title: `Werk ${String(n).padStart(2, '0')}`,
-    }))
+    .map((n, index) => {
+      const details = detailsByNumber[n] || {}
+
+      return {
+        id: index + 1,
+        number: n,
+        scenarioSrc: szenarios[n],
+        wallSrc: walls[n],
+        title: `Werk ${String(n).padStart(2, '0')}`,
+        priceCategory: details.priceCategory || 'TBD',
+        technique: details.technique || 'Technik folgt',
+        dimensions: {
+          widthCm: details.dimensions?.widthCm ?? null,
+          heightCm: details.dimensions?.heightCm ?? null,
+        },
+      }
+    })
 }
 
 export const paintings = buildPaintings()
