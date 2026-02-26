@@ -5,7 +5,7 @@ import { applySeo, toAbsoluteUrl } from '../utils/seo'
 
 export default function Catalogue() {
   const navigate = useNavigate()
-  const [viewMode, setViewMode] = useState('split')
+  const [viewMode, setViewMode] = useState('wall')
   const [lightboxIndex, setLightboxIndex] = useState(null)
   const [lightboxView, setLightboxView] = useState('wall')
   const total = paintings.length
@@ -161,7 +161,7 @@ export default function Catalogue() {
           className={viewMode === 'split' ? 'is-active' : ''}
           onClick={() => setViewMode('split')}
         >
-          Beide Ansichten
+          Diptychon
         </button>
         <button
           type="button"
@@ -238,7 +238,7 @@ export default function Catalogue() {
               </div>
               <div className="catalogue-card__meta">
                 <div className="catalogue-card__headline">
-                  <h3 className="catalogue-card__title">{work.title}</h3>
+                  <h3 className="catalogue-card__title">{work.displayTitle || work.title}</h3>
                 </div>
                 <dl className="catalogue-card__details">
                   <div className="catalogue-card__detail-row">
@@ -339,7 +339,7 @@ export default function Catalogue() {
                     src={paintings[lightboxIndex].wallSrc}
                     alt={buildArtworkAlt(paintings[lightboxIndex], 'an der Wand')}
                   />
-                  <figcaption>{paintings[lightboxIndex].title}</figcaption>
+                  <figcaption>{paintings[lightboxIndex].displayTitle || paintings[lightboxIndex].title}</figcaption>
                 </figure>
               )}
               {lightboxView === 'scenario' && (
@@ -348,7 +348,7 @@ export default function Catalogue() {
                     src={paintings[lightboxIndex].scenarioSrc}
                     alt={buildArtworkAlt(paintings[lightboxIndex], 'im Raum')}
                   />
-                  <figcaption>{paintings[lightboxIndex].title}</figcaption>
+                  <figcaption>{paintings[lightboxIndex].displayTitle || paintings[lightboxIndex].title}</figcaption>
                 </figure>
               )}
               {lightboxView === 'split' && (

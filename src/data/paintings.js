@@ -35,7 +35,9 @@ function buildPaintings() {
   }
   const szenarios = byNum(szenarioModules)
   const walls = byNum(wallModules)
-  const numbers = [...new Set([...Object.keys(szenarios).map(Number), ...Object.keys(walls).map(Number)])].sort((a, b) => a - b)
+  const numbers = [...new Set([...Object.keys(szenarios).map(Number), ...Object.keys(walls).map(Number)])]
+    .filter((n) => n !== 15)
+    .sort((a, b) => a - b)
   return numbers
     .filter((n) => szenarios[n] && walls[n])
     .map((n, index) => {
@@ -46,7 +48,10 @@ function buildPaintings() {
         number: n,
         scenarioSrc: szenarios[n],
         wallSrc: walls[n],
-        title: `Werk ${String(n).padStart(2, '0')}`,
+        title: details.title || `Werk ${String(n).padStart(2, '0')}`,
+        displayTitle: details.title
+          ? `Werk ${String(n).padStart(2, '0')} - ${details.title}`
+          : `Werk ${String(n).padStart(2, '0')}`,
         priceCategory: details.priceCategory || 'TBD',
         technique: details.technique || 'Technik folgt',
         dimensions: {

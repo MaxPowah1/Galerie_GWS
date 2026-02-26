@@ -57,17 +57,82 @@ export default function Home() {
       title: 'Impressum',
       content: (
         <>
+          <p>Angaben gemäß § 5 TMG:</p>
           <p>
-            Angaben gemaess Paragraph 5 TMG. Bitte ergaenzen:
+            Gabriele Wenger-Scherb
+            <br />
+            Marktplatz 3
+            <br />
+            91722 Arberg
+            <br />
+            Deutschland
           </p>
           <p>
-            Name / Unternehmen
-            <br />
-            Strasse + Hausnummer
-            <br />
-            PLZ + Ort
+            Kontakt:
             <br />
             E-Mail: {emailAddress || 'wird bei aktivem JavaScript dynamisch eingefügt'}
+          </p>
+          <p>Berufsbezeichnung: Bildende Künstlerin (freiberuflich)</p>
+          <p>
+            Inhaltlich verantwortlich gemäß § 18 Abs. 2 MStV:
+            <br />
+            Gabriele Wenger-Scherb
+            <br />
+            Anschrift wie oben
+          </p>
+
+          <h4>Haftung für Inhalte</h4>
+          <p>
+            Als Diensteanbieterin bin ich gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen
+            Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG bin ich jedoch nicht verpflichtet, übermittelte oder gespeicherte
+            fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+          </p>
+          <p>
+            Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben
+            hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten
+            Rechtsverletzung möglich. Bei Bekanntwerden entsprechender Rechtsverletzungen werde ich diese Inhalte umgehend
+            entfernen.
+          </p>
+
+          <h4>Haftung für Links</h4>
+          <p>
+            Mein Angebot kann Links zu externen Websites Dritter enthalten, auf deren Inhalte ich keinen Einfluss habe. Deshalb
+            kann ich für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets die
+            jeweilige Anbieterin oder der jeweilige Betreiber verantwortlich. Rechtswidrige Inhalte waren zum Zeitpunkt der
+            Verlinkung nicht erkennbar.
+          </p>
+          <p>
+            Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer
+            Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werde ich derartige Links umgehend
+            entfernen.
+          </p>
+
+          <h4>Urheberrecht</h4>
+          <p>
+            Die durch die Seitenbetreiberin erstellten Inhalte und Werke auf diesen Seiten (insbesondere alle Bilder,
+            Fotografien und Texte) unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und
+            jede Art der Verwertung außerhalb der Grenzen des Urheberrechts bedürfen der schriftlichen Zustimmung der
+            jeweiligen Urheberin. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch
+            gestattet, sofern nicht ausdrücklich anders gekennzeichnet.
+          </p>
+          <p>
+            Soweit die Inhalte auf dieser Seite nicht von der Betreiberin selbst erstellt wurden, werden die Urheberrechte
+            Dritter beachtet und entsprechende Inhalte als solche gekennzeichnet. Sollten Sie trotzdem auf eine
+            Urheberrechtsverletzung aufmerksam werden, bitte ich um einen entsprechenden Hinweis. Bei Bekanntwerden von
+            Rechtsverletzungen werde ich derartige Inhalte umgehend entfernen.
+          </p>
+
+          <h4>Online-Streitbeilegung und Verbraucherschlichtung</h4>
+          <p>
+            Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:{' '}
+            <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noreferrer">
+              https://ec.europa.eu/consumers/odr/
+            </a>
+            .
+          </p>
+          <p>
+            Ich bin weder verpflichtet noch bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle
+            teilzunehmen.
           </p>
         </>
       ),
@@ -96,7 +161,11 @@ export default function Home() {
           <p>
             Gabriele Wenger-Scherb
             <br />
-            (Anschrift bitte ergänzen)
+            Marktplatz 3
+            <br />
+            91722 Arberg
+            <br />
+            Deutschland
             <br />
             E-Mail: {emailAddress || 'wird bei aktivem JavaScript dynamisch eingefügt'}
           </p>
@@ -500,6 +569,7 @@ export default function Home() {
   }
 
   const signaturePath = 'M80 100 C 200 100, 280 40, 380 80 C 420 100, 380 140, 320 120 C 260 100, 300 60, 420 60 C 580 60, 700 80, 820 90'
+  const getWerkuebersichtLabel = (index) => `Werk${String(index + 1).padStart(2, '0')}`
 
   return (
     <>
@@ -731,8 +801,8 @@ export default function Home() {
                     }}
                     className={`constellation-card${index === activeIndex ? ' is-active' : ''}`}
                   >
-                    <img src={art.wallSrc} alt={`${art.title} Vorschau`} loading="lazy" />
-                    <span>{art.title}</span>
+                    <img src={art.wallSrc} alt={`${getWerkuebersichtLabel(index)} Vorschau`} loading="lazy" />
+                    <span>{getWerkuebersichtLabel(index)}</span>
                   </button>
                 ))}
                 {(paired.length >= 12 ? paired.slice(10, 11) : paired.slice(-2, -1)).map((art) => (
@@ -897,9 +967,9 @@ export default function Home() {
           >
             <img
               src={paired[zoomedIndex].wallSrc}
-              alt={`${paired[zoomedIndex].title} vergrößert`}
+              alt={`${getWerkuebersichtLabel(zoomedIndex)} vergrößert`}
             />
-            <figcaption>{paired[zoomedIndex].title}</figcaption>
+            <figcaption>{getWerkuebersichtLabel(zoomedIndex)}</figcaption>
           </figure>
         </div>
       )}
