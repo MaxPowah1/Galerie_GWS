@@ -4,10 +4,32 @@ import { useSplash } from '../context/SplashContext'
 import artistPhoto from '../assets/Artist/Artist_foto.png'
 import artistPhotoPose2 from '../assets/Artist/Artist_pose_2.png'
 import { paintings } from '../data/paintings'
+import { applySeo, toAbsoluteUrl } from '../utils/seo'
+
+const EMAIL_PARTS = {
+  user: [97, 110, 102, 114, 97, 103, 101], // "anfrage"
+  domain: [97, 116, 101, 108, 105, 101, 114, 45, 119, 101, 110, 103, 101, 114, 115, 99, 104, 101, 114, 98], // "atelier-wengerscherb"
+  tld: [99, 111, 109], // "com"
+}
+
+function buildEmailFromParts() {
+  const fromCodes = (codes) => String.fromCharCode(...codes)
+  const user = fromCodes(EMAIL_PARTS.user)
+  const domain = fromCodes(EMAIL_PARTS.domain)
+  const tld = fromCodes(EMAIL_PARTS.tld)
+  return `${user}@${domain}.${tld}`
+}
 
 function wrapIndex(index, length) {
   if (length === 0) return 0
   return (index + length) % length
+}
+
+function formatDimensions(dimensions) {
+  if (!dimensions) return 'Maße unbekannt'
+  const { widthCm, heightCm } = dimensions
+  if (!widthCm || !heightCm) return 'Maße unbekannt'
+  return `${heightCm} x ${widthCm} cm`
 }
 
 export default function Home() {
@@ -24,6 +46,8 @@ export default function Home() {
   const [activeLegalPopup, setActiveLegalPopup] = useState(null)
   const [footerVisible, setFooterVisible] = useState(false)
   const footerSentinelRef = useRef(null)
+  const [emailAddress, setEmailAddress] = useState('')
+  const [emailHref, setEmailHref] = useState('#')
 
   const WERKUEBERSICHT_WALL_COUNT = 10
   const werkuebersichtWallPaintings = paired.slice(0, WERKUEBERSICHT_WALL_COUNT)
@@ -43,32 +67,115 @@ export default function Home() {
             <br />
             PLZ + Ort
             <br />
-            E-Mail: studio@example.com
+            E-Mail: {emailAddress || 'wird bei aktivem JavaScript dynamisch eingefügt'}
           </p>
         </>
       ),
     },
     privacy: {
       label: 'Datenschutz',
-      title: 'Datenschutzerklaerung',
+      title: 'Datenschutzerklärung',
       content: (
         <>
           <p>
-            Diese Website verarbeitet personenbezogene Daten nur im erforderlichen Umfang (z. B. Server-Logs, Kontaktanfragen per E-Mail).
+            Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert,
+            wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert
+            werden können. Diese Datenschutzerklärung erläutert, welche Daten wir erheben und wofür wir sie nutzen. Sie
+            erläutert auch, wie und zu welchem Zweck das geschieht.
           </p>
           <p>
-            Ergaenzen Sie hier Informationen zu Verantwortlichen, Rechtsgrundlagen, Speicherdauer und Betroffenenrechten gemaess DSGVO.
+            Diese Hinweise wurden nach bestem Wissen erstellt, ersetzen jedoch keine individuelle Rechtsberatung. Für eine
+            rechtlich verbindliche Prüfung Ihrer konkreten Situation wenden Sie sich bitte an eine Rechtsanwältin oder einen
+            Rechtsanwalt.
+          </p>
+
+          <h4>1. Verantwortliche Stelle</h4>
+          <p>
+            Verantwortlich für die Datenverarbeitung auf dieser Website im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:
+          </p>
+          <p>
+            Gabriele Wenger-Scherb
+            <br />
+            (Anschrift bitte ergänzen)
+            <br />
+            E-Mail: {emailAddress || 'wird bei aktivem JavaScript dynamisch eingefügt'}
+          </p>
+
+          <h4>2. Hosting und Server-Logfiles</h4>
+          <p>
+            Diese Website wird bei einem externen Dienstleister (Hosting-Provider) betrieben. Beim Aufruf der Website werden
+            durch Ihren Browser automatisch Informationen an den Server unseres Providers übermittelt und temporär in
+            sogenannten Server-Logfiles gespeichert. Dies sind insbesondere:
+          </p>
+          <ul>
+            <li>IP-Adresse des anfragenden Endgeräts</li>
+            <li>Datum und Uhrzeit des Zugriffs</li>
+            <li>Name und URL der abgerufenen Datei</li>
+            <li>Website, von der aus der Zugriff erfolgt (Referrer-URL)</li>
+            <li>verwendeter Browser und ggf. das Betriebssystem Ihres Endgeräts</li>
+          </ul>
+          <p>
+            Die Verarbeitung dieser Daten erfolgt zur Sicherstellung eines reibungslosen Verbindungsaufbaus der Website,
+            zur Auswertung der Systemsicherheit und -stabilität sowie zu administrativen Zwecken.
+            Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).
+          </p>
+
+          <h4>3. Kontaktaufnahme per E-Mail</h4>
+          <p>
+            Wenn Sie uns per E-Mail kontaktieren, werden Ihre Anfrage inklusive der von Ihnen angegebenen Kontaktdaten
+            (z.&nbsp;B. Name, E-Mail-Adresse, Inhalt der Nachricht) zum Zweck der Bearbeitung der Anfrage und für den Fall von
+            Anschlussfragen bei uns gespeichert und verarbeitet.
+          </p>
+          <p>
+            Rechtsgrundlage für die Verarbeitung dieser Daten ist Art. 6 Abs. 1 lit. b DSGVO, sofern Ihre Anfrage mit der
+            Erfüllung eines Vertrags zusammenhängt oder zur Durchführung vorvertraglicher Maßnahmen erforderlich ist,
+            sowie im Übrigen Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Bearbeitung von Anfragen).
+          </p>
+
+          <h4>4. Cookies und Tracking</h4>
+          <p>
+            Nach aktuellem Stand verwenden wir ausschließlich technisch notwendige Cookies bzw. vergleichbare Technologien,
+            die für den Betrieb dieser Website erforderlich sind (z.&nbsp;B. für die Darstellung und Navigation).
+            Es werden insbesondere keine Analyse- oder Marketing-Tools wie z.&nbsp;B. Google Analytics eingesetzt.
+          </p>
+
+          <h4>5. Weitergabe von Daten</h4>
+          <p>
+            Eine Übermittlung Ihrer personenbezogenen Daten an Dritte findet grundsätzlich nicht statt, es sei denn, wir sind
+            gesetzlich dazu verpflichtet oder Sie haben ausdrücklich eingewilligt.
+          </p>
+
+          <h4>6. Speicherdauer</h4>
+          <p>
+            Personenbezogene Daten werden nur so lange gespeichert, wie es zur Erfüllung der jeweiligen Zwecke erforderlich
+            ist oder wie es gesetzliche Aufbewahrungsfristen vorsehen. Server-Logfiles werden in der Regel nach einer
+            angemessenen Frist automatisch gelöscht, sofern keine weitergehende Aufbewahrung aus Beweisgründen notwendig ist.
+          </p>
+
+          <h4>7. Ihre Rechte</h4>
+          <p>
+            Sie haben im Rahmen der geltenden gesetzlichen Bestimmungen jederzeit das Recht auf unentgeltliche Auskunft über
+            Ihre bei uns gespeicherten personenbezogenen Daten, deren Herkunft und Empfänger und den Zweck der
+            Datenverarbeitung sowie ggf. ein Recht auf Berichtigung, Löschung oder Einschränkung der Verarbeitung dieser Daten.
+            Außerdem haben Sie ein Recht auf Datenübertragbarkeit.
+          </p>
+          <p>
+            Sofern die Datenverarbeitung auf Grundlage von Art. 6 Abs. 1 lit. a DSGVO (Einwilligung) oder Art. 6 Abs. 1 lit. e
+            oder f DSGVO erfolgt, steht Ihnen zudem das Recht zu, aus Gründen, die sich aus Ihrer besonderen Situation
+            ergeben, jederzeit Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten einzulegen.
+          </p>
+          <p>
+            Darüber hinaus haben Sie das Recht, sich bei einer zuständigen Datenschutzaufsichtsbehörde zu beschweren, wenn
+            Sie der Ansicht sind, dass die Verarbeitung Ihrer personenbezogenen Daten gegen die DSGVO verstößt.
+          </p>
+
+          <h4>8. Stand dieser Datenschutzerklärung</h4>
+          <p>
+            Diese Datenschutzerklärung ist aktuell gültig und hat den Stand Februar 2026. Durch die Weiterentwicklung unserer
+            Website oder aufgrund geänderter gesetzlicher bzw. behördlicher Vorgaben kann es notwendig werden, diese
+            Datenschutzerklärung anzupassen.
           </p>
         </>
-      ),
-    },
-    terms: {
-      label: 'Nutzungsbedingungen',
-      title: 'Nutzungsbedingungen',
-      content: (
-        <p>
-          Inhalte dieser Website dienen der Information. Urheberrechte und Nutzungsrechte an Texten und Bildern verbleiben bei der Urheberin, sofern nicht anders angegeben.
-        </p>
       ),
     },
     cookies: {
@@ -76,12 +183,98 @@ export default function Home() {
       title: 'Cookie-Hinweis',
       content: (
         <p>
-          Aktuell werden nur technisch notwendige Cookies eingesetzt. Falls Analyse- oder Marketing-Cookies verwendet werden, bitte hier die Einwilligungs- und Widerrufsmoeglichkeiten ergaenzen.
+          Auf dieser Website werden derzeit keine Analyse- oder Marketing-Cookies eingesetzt. Es kommt lediglich eine
+          technisch notwendige Sitzungsspeicherung (sessionStorage) zum Einsatz, um die Start-Animation („Splash Screen“)
+          nur beim ersten Aufruf innerhalb einer Sitzung anzuzeigen. Diese Verarbeitung dient ausschließlich der stabilen
+          und nutzerfreundlichen Darstellung der Website und erfordert nach derzeitigem Stand keine gesonderte
+          Einwilligung über ein Cookie-Banner.
         </p>
       ),
     },
   }
   const activeLegalContent = activeLegalPopup ? legalPopups[activeLegalPopup] : null
+  const seoKeywords =
+    'zeitgenössische Malerei, figurative Kunst, expressive Landschaftsmalerei, modernes Stillleben, Gabriele Wenger-Scherb, Kunst kaufen, Mittelfranken, Bayern, Region Mittelfranken'
+  const artworkListJsonLd = useMemo(
+    () =>
+      paired.map((work, index) => ({
+        '@type': 'VisualArtwork',
+        name: work.title,
+        image: toAbsoluteUrl(work.wallSrc),
+        artform: 'Malerei',
+        artMedium: work.technique,
+        width: work.dimensions?.widthCm ? `${work.dimensions.widthCm} cm` : undefined,
+        height: work.dimensions?.heightCm ? `${work.dimensions.heightCm} cm` : undefined,
+        description: `${work.title}, ${work.technique}, ${formatDimensions(work.dimensions)}, Preiskategorie ${work.priceCategory}.`,
+        url: toAbsoluteUrl('/katalog'),
+        position: index + 1,
+      })),
+    [paired],
+  )
+  const homeJsonLd = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'WebSite',
+          name: 'Gabriele Wenger-Scherb',
+          url: toAbsoluteUrl('/'),
+          inLanguage: 'de',
+          areaServed: {
+            '@type': 'AdministrativeArea',
+            name: 'Mittelfranken, Bayern, Deutschland',
+          },
+        },
+        {
+          '@type': 'Person',
+          name: 'Gabriele Wenger-Scherb',
+          jobTitle: 'Malerin',
+          url: toAbsoluteUrl('/'),
+          image: toAbsoluteUrl(artistPhoto),
+          email: emailAddress ? `mailto:${emailAddress}` : undefined,
+          address: {
+            '@type': 'PostalAddress',
+            addressRegion: 'Mittelfranken',
+            addressCountry: 'DE',
+          },
+          areaServed: {
+            '@type': 'AdministrativeArea',
+            name: 'Mittelfranken, Bayern, Deutschland',
+          },
+        },
+        {
+          '@type': 'CollectionPage',
+          name: 'Impressionen und Werkschau',
+          url: toAbsoluteUrl('/'),
+          hasPart: artworkListJsonLd,
+          inLanguage: 'de',
+          areaServed: {
+            '@type': 'AdministrativeArea',
+            name: 'Mittelfranken, Bayern, Deutschland',
+          },
+        },
+      ],
+    }),
+    [artworkListJsonLd, emailAddress],
+  )
+
+  useEffect(() => {
+    const address = buildEmailFromParts()
+    setEmailAddress(address)
+    setEmailHref(`mailto:${address}`)
+  }, [])
+
+  useEffect(() => {
+    applySeo({
+      title: 'Gabriele Wenger-Scherb - Zeitgenoessische Malerei',
+      description:
+        'Zeitgenoessische figurative und atmosphaerische Malerei von Gabriele Wenger-Scherb in Mittelfranken (Bayern). Entdecken Sie Impressionen, Werkschau und Kontakt fuer Anfragen.',
+      canonicalPath: '/',
+      keywords: seoKeywords,
+      ogImage: toAbsoluteUrl(paired[0]?.wallSrc),
+      jsonLd: homeJsonLd,
+    })
+  }, [homeJsonLd, paired, seoKeywords])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -301,6 +494,11 @@ export default function Home() {
     if (section) section.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
   }
 
+  const jumpToContact = () => {
+    const section = document.getElementById('contact')
+    if (section) section.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+  }
+
   const signaturePath = 'M80 100 C 200 100, 280 40, 380 80 C 420 100, 380 140, 320 120 C 260 100, 300 60, 420 60 C 580 60, 700 80, 820 90'
 
   return (
@@ -342,9 +540,14 @@ export default function Home() {
           <p className="hero__statement">
             Ich male die Welt, wie sie ist – ungefiltert und voller Farbe. Vom Chaos eines Walddickichts bis zur stillen Geometrie einer Wohnwagensiedlung in der Dämmerung: Meine Kunst feiert die Texturen des modernen Lebens und lädt zum Innehalten und genauen Hinsehen ein.
           </p>
-          <button type="button" className="btn btn--dark" data-reveal="up" data-reveal-delay="180" onClick={jumpToPortfolio}>
-            Zu den Werken
-          </button>
+          <div className="hero__cta-group" data-reveal="up" data-reveal-delay="180">
+            <button type="button" className="btn btn--dark" onClick={jumpToPortfolio}>
+              Zu den Werken
+            </button>
+            <button type="button" className="btn btn--dark" onClick={jumpToContact}>
+              Anfrage stellen
+            </button>
+          </div>
         </div>
         <figure className="hero__image-wrap" data-reveal="right">
           <img src={artistPhoto} alt="Gabriele Wenger-Scherb, Künstlerin" className="hero__image" />
@@ -355,6 +558,7 @@ export default function Home() {
         <section id="portfolio-lab" className="portfolio-lab">
           <div className="section-head" data-reveal="up">
             <p className="section-label">Impressionen</p>
+            <h2 className="portfolio-lab__heading">Ausgewaehlte Werke</h2>
             <p className="section-note">
               {isMobilePortfolio
                 ? 'Durch die Werke wischen, Details vergleichen und direkt eine Arbeit aus der Mini-Galerie unten waehlen.'
@@ -539,7 +743,7 @@ export default function Home() {
                     aria-label="Im Katalog finden Sie eine komplette Übersicht aller Bilder"
                   >
                     <span className="constellation-card__img-wrap">
-                      <img src={art.wallSrc} alt="" loading="lazy" />
+                      <img src={art.wallSrc} alt={`${art.title} im Katalog`} loading="lazy" />
                       <span className="constellation-card__catalogue-overlay-bg" aria-hidden="true" />
                       <span className="constellation-card__catalogue-overlay">
                         Im Katalog finden Sie eine komplette Übersicht aller Bilder
@@ -567,7 +771,7 @@ export default function Home() {
         <p className="section-label" data-reveal="left">Künstlerin</p>
         <div className="artist__layout">
           <div className="artist__text" data-reveal="left">
-            <h2>Gabriele Wenger-Scherb</h2>
+            <h2>Ueber die Kuenstlerin</h2>
             <p>
               Meine Kunst ist eine Erkundung der Momente, die wir normalerweise übersehen – der Stapel Wäsche in der Ecke, der Blick aus einem Lastwagen auf einer einsamen Autobahn oder die stille Konzentration eines Menschen bei der Arbeit. Mich fasziniert die Schnittstelle zwischen dem Häuslichen und dem Ungezähmten. Durch kräftige Pinselstriche und eine lebendige Farbpalette übersetze ich die physische Präsenz meiner Umgebung in eine Bildsprache, die sich zugleich vertraut und surreal anfühlt.
             </p>
@@ -601,9 +805,23 @@ export default function Home() {
           <p>
             Für Ausstellungen, Preise, Auftragsarbeiten und Studio-Anfragen freue ich mich über Ihre Nachricht.
           </p>
-          <a className="btn btn--dark" href="mailto:studio@example.com">
-            gabriele@example.com
+          <p>
+            Weitere Arbeiten finden Sie im <Link to="/katalog">vollstaendigen Katalog</Link>.
+          </p>
+          <a
+            className="btn btn--dark"
+            href={emailHref}
+            onClick={(e) => {
+              if (!emailAddress || !emailHref || emailHref === '#') {
+                e.preventDefault()
+              }
+            }}
+          >
+            {emailAddress || 'E-Mail schreiben'}
           </a>
+          <span className="contact__honeypot" aria-hidden="true">
+            kontakt+spamtrap@example.invalid
+          </span>
         </div>
       </section>
 

@@ -376,8 +376,15 @@ main {
   border-top: 1px solid rgba(17, 17, 17, 0.12);
 }
 
-.hero__intro .btn {
+.hero__cta-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   margin-top: 1.75rem;
+}
+
+.hero__cta-group .btn {
+  margin-top: 0;
 }
 
 .hero__image-wrap {
@@ -434,6 +441,12 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.19em;
   font-size: 0.82rem;
+}
+
+.portfolio-lab__heading {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  line-height: 1.2;
 }
 
 .section-note {
@@ -1316,6 +1329,19 @@ main {
   object-fit: cover;
 }
 
+.contact__honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Scroll-Reveal: sanfte Animationen beim Einblenden */
 [data-reveal] {
   --reveal-duration: 2000ms;
@@ -1545,6 +1571,64 @@ main {
   color: #fff;
 }
 
+.catalogue-pricing {
+  margin: 2rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid #111;
+}
+
+.catalogue-pricing__intro {
+  margin: 0 0 0.6rem;
+}
+
+.catalogue-pricing__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.catalogue-pricing__text {
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  color: #666;
+}
+
+.catalogue-pricing__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.catalogue-pricing__item {
+  margin: 0;
+  padding: 0.4rem 0;
+  border: none;
+  border-bottom: 1px solid #e3e3e3;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.catalogue-pricing__category {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #111;
+}
+
+.catalogue-pricing__value {
+  font-size: 0.8rem;
+  color: #111;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
 .catalogue-grid {
   list-style: none;
   margin: 0;
@@ -1552,6 +1636,12 @@ main {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   gap: 2rem;
+}
+
+.catalogue-grid__heading {
+  margin: 2rem 0 1rem;
+  font-size: clamp(1.2rem, 2.2vw, 1.7rem);
+  font-weight: 500;
 }
 
 .catalogue-grid__item {
@@ -1997,6 +2087,15 @@ main {
     flex: 1;
     min-height: 2.5rem;
     touch-action: manipulation;
+  }
+
+  .catalogue-pricing {
+    margin-top: 1.4rem;
+    padding-top: 1rem;
+  }
+
+  .catalogue-pricing__list {
+    gap: 0.4rem;
   }
 
   .constellation-lightbox {

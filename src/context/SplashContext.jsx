@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const SPLASH_SESSION_KEY = 'gws_home_splash_seen'
+const SPLASH_SESSION_KEY = 'gws_home_splash_seen_v2'
 
 const SplashContext = createContext({ splashVisible: false, setSplashDone: () => {} })
 

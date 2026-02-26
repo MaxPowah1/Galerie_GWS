@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useSplash } from '../context/SplashContext'
 
 const NAV_ITEMS = [
-  { href: '/#portfolio-lab', label: 'Werke', isHash: true },
+  { href: '/#portfolio-lab', label: 'Impressionen', isHash: true },
   { href: '/katalog', label: 'Katalog', isHash: false },
   { href: '/#artist', label: 'Künstlerin', isHash: true },
   { href: '/#contact', label: 'Kontakt', isHash: true },

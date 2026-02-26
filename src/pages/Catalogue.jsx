@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { paintings } from '../data/paintings'
+import { applySeo, toAbsoluteUrl } from '../utils/seo'
 
 export default function Catalogue() {
   const navigate = useNavigate()
@@ -8,6 +9,26 @@ export default function Catalogue() {
   const [lightboxIndex, setLightboxIndex] = useState(null)
   const [lightboxView, setLightboxView] = useState('wall')
   const total = paintings.length
+  const categoryOrder = ['A', 'B', 'C', 'D', 'E', 'F']
+  const priceByCategory = {
+    A: 'von 400 € bis 600 €',
+    B: 'von 700 € bis 900 €',
+    C: 'von 1.100 € bis 1.500 €',
+    D: 'von 1.600 € bis 2.200 €',
+  }
+  const priceGuide = [...new Set(paintings.map(({ priceCategory }) => priceCategory).filter(Boolean))]
+    .sort((a, b) => {
+      const ai = categoryOrder.indexOf(a)
+      const bi = categoryOrder.indexOf(b)
+      if (ai === -1 && bi === -1) return a.localeCompare(b, 'de')
+      if (ai === -1) return 1
+      if (bi === -1) return -1
+      return ai - bi
+    })
+    .map((category) => ({
+      category,
+      priceLabel: priceByCategory[category] || 'Preis auf Anfrage',
+    }))
 
   const formatDimensions = (dimensions) => {
     if (!dimensions) return 'Maße folgen'
@@ -16,8 +37,39 @@ export default function Catalogue() {
     return `${heightCm} x ${widthCm} cm (H x B)`
   }
 
+  const buildArtworkAlt = (work, context) => {
+    const dimensions = formatDimensions(work.dimensions)
+    return `${work.title}, ${work.technique}, ${dimensions}, Preiskategorie ${work.priceCategory}, ${context}`
+  }
+
+  const collectionJsonLd = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: 'Katalog - Alle Werke',
+      url: toAbsoluteUrl('/katalog'),
+      inLanguage: 'de',
+      hasPart: paintings.map((work) => ({
+        '@type': 'VisualArtwork',
+        name: work.title,
+        image: toAbsoluteUrl(work.wallSrc),
+        artform: 'Malerei',
+        artMedium: work.technique,
+        width: work.dimensions?.widthCm ? `${work.dimensions.widthCm} cm` : undefined,
+        height: work.dimensions?.heightCm ? `${work.dimensions.heightCm} cm` : undefined,
+        url: toAbsoluteUrl('/katalog'),
+        description: `${work.title}, ${work.technique}, ${formatDimensions(work.dimensions)}, Preiskategorie ${work.priceCategory}.`,
+      })),
+    }),
+    [],
+  )
+
   const goToGallery = () => {
     navigate('/', { state: { scrollTo: 'portfolio-lab' } })
+  }
+
+  const goToContact = () => {
+    navigate('/', { state: { scrollTo: 'contact' } })
   }
 
   const openLightbox = (index) => {
@@ -29,11 +81,11 @@ export default function Catalogue() {
 
   const goToPrevious = useCallback(() => {
     setLightboxIndex((i) => (i === null ? null : (i - 1 + paintings.length) % paintings.length))
-  }, [paintings.length])
+  }, [])
 
   const goToNext = useCallback(() => {
     setLightboxIndex((i) => (i === null ? null : (i + 1) % paintings.length))
-  }, [paintings.length])
+  }, [])
 
   const cycleLightboxView = useCallback(() => {
     setLightboxView((v) => (v === 'wall' ? 'scenario' : v === 'scenario' ? 'split' : 'wall'))
@@ -69,6 +121,20 @@ export default function Catalogue() {
     items.forEach((item) => observer.observe(item))
     return () => observer.disconnect()
   }, [total])
+
+  useEffect(() => {
+    applySeo({
+      title: 'Katalog - Alle Werke | Gabriele Wenger-Scherb',
+      description:
+        'Alle Werke von Gabriele Wenger-Scherb im Katalog: Malerei im Raum und an der Wand, inklusive Technik, Masse und Preiskategorie – fuer Sammler in Mittelfranken, Bayern und darueber hinaus.',
+      canonicalPath: '/katalog',
+      keywords:
+        'Kunstkatalog, Gemaelde kaufen, zeitgenoessische Malerei, Galerie, Gabriele Wenger-Scherb, Mittelfranken, Bayern, Kunst kaufen in Mittelfranken',
+      ogType: 'article',
+      ogImage: toAbsoluteUrl(paintings[0]?.wallSrc),
+      jsonLd: collectionJsonLd,
+    })
+  }, [collectionJsonLd])
 
   return (
     <div className="catalogue-page">
@@ -117,6 +183,8 @@ export default function Catalogue() {
         </button>
       </div>
 
+      <h2 className="catalogue-grid__heading">Werke im Ueberblick</h2>
+
       <ul className="catalogue-grid" aria-label="Werkliste">
         {paintings.map((work, index) => (
           <li key={work.id} className="catalogue-grid__item" data-catalogue-reveal>
@@ -134,16 +202,16 @@ export default function Catalogue() {
                     <figure className="catalogue-card__figure catalogue-card__figure--scenario">
                       <img
                         src={work.scenarioSrc}
-                        alt={`${work.title} im Raum`}
-                        loading={index < 12 ? 'eager' : 'lazy'}
+                        alt={buildArtworkAlt(work, 'im Raum')}
+                        loading={index === 0 ? 'eager' : 'lazy'}
                       />
                       <figcaption>Im Raum</figcaption>
                     </figure>
                     <figure className="catalogue-card__figure catalogue-card__figure--wall">
                       <img
                         src={work.wallSrc}
-                        alt={`${work.title} an der Wand`}
-                        loading={index < 12 ? 'eager' : 'lazy'}
+                        alt={buildArtworkAlt(work, 'an der Wand')}
+                        loading={index === 0 ? 'eager' : 'lazy'}
                       />
                       <figcaption>An der Wand</figcaption>
                     </figure>
@@ -153,8 +221,8 @@ export default function Catalogue() {
                   <figure className="catalogue-card__figure catalogue-card__figure--single">
                     <img
                       src={work.scenarioSrc}
-                      alt={`${work.title} im Raum`}
-                      loading={index < 12 ? 'eager' : 'lazy'}
+                      alt={buildArtworkAlt(work, 'im Raum')}
+                      loading={index === 0 ? 'eager' : 'lazy'}
                     />
                   </figure>
                 )}
@@ -162,8 +230,8 @@ export default function Catalogue() {
                   <figure className="catalogue-card__figure catalogue-card__figure--single">
                     <img
                       src={work.wallSrc}
-                      alt={`${work.title} an der Wand`}
-                      loading={index < 12 ? 'eager' : 'lazy'}
+                      alt={buildArtworkAlt(work, 'an der Wand')}
+                      loading={index === 0 ? 'eager' : 'lazy'}
                     />
                   </figure>
                 )}
@@ -192,10 +260,27 @@ export default function Catalogue() {
         ))}
       </ul>
 
+      <section className="catalogue-pricing" data-catalogue-reveal aria-label="Preiskategorien">
+        <div className="catalogue-pricing__intro">
+          <h2 className="catalogue-pricing__title">Preiskategorien</h2>
+        </div>
+        <ul className="catalogue-pricing__list">
+          {priceGuide.map(({ category, priceLabel }) => (
+            <li key={category} className="catalogue-pricing__item">
+              <span className="catalogue-pricing__category">{category}</span>
+              <span className="catalogue-pricing__value">{priceLabel}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <footer className="catalogue-footer" data-catalogue-reveal>
         <p className="catalogue-footer__text">{total} Werke in dieser Sammlung.</p>
         <button type="button" className="btn btn--dark" onClick={goToGallery}>
           Zurück zur Galerie
+        </button>
+        <button type="button" className="btn btn--dark" onClick={goToContact}>
+          Anfrage stellen
         </button>
       </footer>
 
@@ -252,7 +337,7 @@ export default function Catalogue() {
                 <figure className="catalogue-lightbox__figure">
                   <img
                     src={paintings[lightboxIndex].wallSrc}
-                    alt={`${paintings[lightboxIndex].title} an der Wand`}
+                    alt={buildArtworkAlt(paintings[lightboxIndex], 'an der Wand')}
                   />
                   <figcaption>{paintings[lightboxIndex].title}</figcaption>
                 </figure>
@@ -261,7 +346,7 @@ export default function Catalogue() {
                 <figure className="catalogue-lightbox__figure">
                   <img
                     src={paintings[lightboxIndex].scenarioSrc}
-                    alt={`${paintings[lightboxIndex].title} im Raum`}
+                    alt={buildArtworkAlt(paintings[lightboxIndex], 'im Raum')}
                   />
                   <figcaption>{paintings[lightboxIndex].title}</figcaption>
                 </figure>
@@ -271,14 +356,14 @@ export default function Catalogue() {
                   <figure className="catalogue-lightbox__figure">
                     <img
                       src={paintings[lightboxIndex].scenarioSrc}
-                      alt={`${paintings[lightboxIndex].title} im Raum`}
+                      alt={buildArtworkAlt(paintings[lightboxIndex], 'im Raum')}
                     />
                     <figcaption>Im Raum</figcaption>
                   </figure>
                   <figure className="catalogue-lightbox__figure">
                     <img
                       src={paintings[lightboxIndex].wallSrc}
-                      alt={`${paintings[lightboxIndex].title} an der Wand`}
+                      alt={buildArtworkAlt(paintings[lightboxIndex], 'an der Wand')}
                     />
                     <figcaption>An der Wand</figcaption>
                   </figure>
