@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weiterleitung…</title>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var current = window.location
+        var targetPath = current.pathname + current.search + current.hash
+        var redirectUrl =
+          current.protocol +
+          '//' +
+          current.host +
+          '/?p=' +
+          encodeURIComponent(targetPath)
+        window.location.replace(redirectUrl)
+      })()
+    </script>
+  </body>
+</html>
