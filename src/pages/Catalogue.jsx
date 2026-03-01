@@ -12,9 +12,9 @@ export default function Catalogue() {
   const categoryOrder = ['A', 'B', 'C', 'D', 'E', 'F']
   const priceByCategory = {
     A: 'von 400 € bis 600 €',
-    B: 'von 700 € bis 900 €',
-    C: 'von 1.100 € bis 1.500 €',
-    D: 'von 1.600 € bis 2.200 €',
+    B: 'von 600 € bis 800 €',
+    C: 'von 800 € bis 1.000 €',
+    D: 'von 1.000 € bis 1.200 €',
   }
   const priceGuide = [...new Set(paintings.map(({ priceCategory }) => priceCategory).filter(Boolean))]
     .sort((a, b) => {

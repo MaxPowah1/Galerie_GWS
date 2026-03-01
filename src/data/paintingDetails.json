@@ -22,28 +22,28 @@
   },
   {
     "number": 4,
-    "priceCategory": "C",
+    "priceCategory": "B",
     "title": "Fahrt in die Freiheit?",
     "technique": "Acryl auf Leinwand",
     "dimensions": { "widthCm": 120, "heightCm": 100 }
   },
   {
     "number": 5,
-    "priceCategory": "B",
+    "priceCategory": "A",
     "title": "Lucca im Camping Daino",
     "technique": "Acryl auf Leinwand",
     "dimensions": { "widthCm": 80, "heightCm": 100 }
   },
   {
     "number": 6,
-    "priceCategory": "A",
+    "priceCategory": "B",
     "title": "Homage an Tamarra de Lempicka",
     "technique": "Acryl auf Leinwand",
     "dimensions": { "widthCm": 80, "heightCm": 80 }
   },
   {
     "number": 7,
-    "priceCategory": "C",
+    "priceCategory": "B",
     "title": "Altes Haus in Triesdorf",
     "technique": "Acryl auf Leinwand",
     "dimensions": { "widthCm": 80, "heightCm": 100 }
