@@ -17,6 +17,18 @@ const SITE = 'https://atelier-wengerscherb.com'
 const ARTIST = 'Gabriele Wenger-Scherb'
 const PAPER = '#f3efe8'
 
+const PRERENDER_CSS = [
+  '.pr{font-family:"Instrument Sans",Arial,sans-serif;background:#f3efe8;color:#1b1915}',
+  '.pr__hero{min-height:100vh;min-height:100svh;display:grid;place-content:center;gap:14px;padding:24px;text-align:center;box-sizing:border-box}',
+  '.pr h1{margin:0;font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:clamp(2rem,6vw,3.4rem);line-height:1}',
+  '.pr__hero p{margin:0 auto;max-width:34rem;color:#6b6358;font-size:.95rem;line-height:1.6}',
+  '.pr__more{max-width:56rem;margin:0 auto;padding:48px 24px;font-size:.9rem;line-height:1.7}',
+  '.pr a{color:inherit}',
+  // Only shown if JavaScript has not taken over after 1.2 s (slow network, no JS);
+  // normally React replaces it first, so visitors go straight into the intro.
+  '.pr{animation:pr-in .5s ease 1.2s both}@keyframes pr-in{from{opacity:0}}',
+].join('')
+
 const details = JSON.parse(await fs.readFile(path.join(ROOT, 'src/data/paintingDetails.json'), 'utf8'))
 
 const pad = (n) => String(n).padStart(2, '0')
@@ -129,6 +141,10 @@ function page({ route, title, description, image, type = 'website', jsonLd, body
     )
   }
   // Plain HTML for crawlers without JavaScript; React replaces it on load.
+  // Styled like the splash's first frame (name centred on gallery paper) so the
+  // moment before JavaScript runs looks intentional instead of a raw list.
+  html = html.replace('</head>', `    <style>${PRERENDER_CSS}</style>
+  </head>`)
   html = html.replace('<div id="root"></div>', `<div id="root">${body}</div>`)
   return html
 }
@@ -163,7 +179,7 @@ await write(
       '@context': 'https://schema.org',
       '@graph': [{ '@type': 'WebSite', name: ARTIST, url: `${SITE}/`, inLanguage: 'de' }, person],
     },
-    body: `<main><h1>${ARTIST} – Malerei</h1><p>Zeitgenössische Malerei aus Arberg, Mittelfranken.</p><h2>Werkverzeichnis</h2><ul>${workList}</ul></main>`,
+    body: `<main class="pr"><div class="pr__hero"><h1>${ARTIST}</h1><p>Zeitgenössische Malerei aus Arberg, Mittelfranken</p></div><section class="pr__more"><h2>Werkverzeichnis</h2><ul>${workList}</ul></section></main>`,
   }),
 )
 
@@ -182,7 +198,7 @@ await write(
       inLanguage: 'de',
       hasPart: works.map((w) => ({ '@type': 'VisualArtwork', name: w.title, url: `${SITE}/werk/${w.slug}` })),
     },
-    body: `<main><h1>Werkverzeichnis</h1><ul>${workList}</ul></main>`,
+    body: `<main class="pr"><div class="pr__hero"><h1>Werkverzeichnis</h1><p>${ARTIST} – alle ${works.length} Gemälde</p></div><section class="pr__more"><ul>${workList}</ul></section></main>`,
   }),
 )
 
@@ -210,7 +226,7 @@ for (const w of works) {
         creator: person,
         inLanguage: 'de',
       },
-      body: `<main><article><h1>${esc(name)}</h1><p>${esc(description)}</p><p><a href="/katalog">Zum Werkverzeichnis</a></p></article></main>`,
+      body: `<main class="pr"><article class="pr__hero"><h1>${esc(name)}</h1><p>${esc(description)}</p><p><a href="/katalog">Zum Werkverzeichnis</a></p></article></main>`,
     }),
   )
 }

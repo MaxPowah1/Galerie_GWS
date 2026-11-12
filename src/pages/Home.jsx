@@ -41,10 +41,11 @@ function Splash({ onDone }) {
   const [leaving, setLeaving] = useState(false)
 
   useEffect(() => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const visible = reduce ? 700 : 2600
+    // Plays regardless of prefers-reduced-motion: it is a line being drawn and a
+    // fade, no movement across the screen. Visitors can click to skip it.
+    const visible = 4400
     const t1 = window.setTimeout(() => setLeaving(true), visible)
-    const t2 = window.setTimeout(onDone, visible + 800)
+    const t2 = window.setTimeout(onDone, visible + 900)
     document.body.style.overflow = 'hidden'
     return () => {
       window.clearTimeout(t1)
