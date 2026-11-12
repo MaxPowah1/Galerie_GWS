@@ -72,7 +72,7 @@ function Work({ slug }) {
       canonicalPath: `/werk/${work.slug}`,
       keywords: `${work.title}, Gemälde kaufen, ${work.technique}, Gabriele Wenger-Scherb, Malerei Mittelfranken`,
       ogType: 'article',
-      ogImage: toAbsoluteUrl((work.art || work.wall).src),
+      ogImage: toAbsoluteUrl(`/og/werk-${work.slug}.jpg`),
       jsonLd: {
         '@context': 'https://schema.org',
         '@type': 'VisualArtwork',

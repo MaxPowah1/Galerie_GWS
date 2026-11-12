@@ -142,7 +142,7 @@ export default function Home() {
         'Zeitgenössische figurative und atmosphärische Malerei von Gabriele Wenger-Scherb in Mittelfranken (Bayern). Alle Werke im Größenverhältnis, Werkverzeichnis und direkte Anfrage.',
       canonicalPath: '/',
       keywords: SEO_KEYWORDS,
-      ogImage: toAbsoluteUrl(paintings[0]?.wall.src),
+      ogImage: toAbsoluteUrl('/og/galerie.jpg'),
       jsonLd: homeJsonLd,
     })
   }, [homeJsonLd])

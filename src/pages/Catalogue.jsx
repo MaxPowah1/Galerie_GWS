@@ -71,7 +71,7 @@ export default function Catalogue() {
       keywords:
         'Werkverzeichnis, Gemälde kaufen, zeitgenössische Malerei, Galerie, Gabriele Wenger-Scherb, Mittelfranken, Bayern, Kunst kaufen in Mittelfranken',
       ogType: 'website',
-      ogImage: toAbsoluteUrl(paintings[0]?.wall.src),
+      ogImage: toAbsoluteUrl('/og/werkverzeichnis.jpg'),
       jsonLd: {
         '@context': 'https://schema.org',
         '@type': 'CollectionPage',

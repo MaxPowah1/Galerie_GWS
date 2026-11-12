@@ -1,5 +1,5 @@
 const SITE_URL = 'https://atelier-wengerscherb.com'
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.svg`
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og/galerie.jpg`
 
 function upsertMeta(attribute, key, content) {
   const selector = `meta[${attribute}="${key}"]`
