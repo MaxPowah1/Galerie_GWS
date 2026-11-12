@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { paintings } from '../data/paintings'
 import WorkIndex from '../components/WorkIndex'
@@ -14,14 +14,14 @@ const VIEWS = [
 ]
 
 const FORMATS = [
-  { id: 'alle', label: 'Alle' },
-  { id: 'hoch', label: 'Hochformat' },
-  { id: 'quer', label: 'Querformat' },
-  { id: 'quadrat', label: 'Quadratisch' },
+  { id: 'alle', label: 'Alle', short: 'Alle' },
+  { id: 'hoch', label: 'Hochformat', short: 'Hoch' },
+  { id: 'quer', label: 'Querformat', short: 'Quer' },
+  { id: 'quadrat', label: 'Quadratisch', short: 'Quadrat' },
 ]
 
 const SORTS = [
-  { id: 'nr', label: 'Nummer' },
+  { id: 'nr', label: 'Nach Nummer' },
   { id: 'gross', label: 'Größte zuerst' },
   { id: 'klein', label: 'Kleinste zuerst' },
 ]
@@ -35,6 +35,14 @@ export default function Catalogue() {
   const view = pick(VIEWS, params.get('ansicht'), 'art')
   const format = pick(FORMATS, params.get('format'), 'alle')
   const sort = pick(SORTS, params.get('sortierung'), 'nr')
+  const [optionsOpen, setOptionsOpen] = useState(false)
+
+  useEffect(() => {
+    if (!optionsOpen) return undefined
+    const onKey = (e) => e.key === 'Escape' && setOptionsOpen(false)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [optionsOpen])
 
   const update = (key, value, fallback) => {
     const next = new URLSearchParams(params)
@@ -119,23 +127,37 @@ export default function Catalogue() {
         </div>
       </header>
 
-      <div className="toolbar">
-        <div className="toolbar__group" role="group" aria-label="Nach Format filtern">
+      <div className="filterbar">
+        <div className="filterbar__formats" role="group" aria-label="Nach Format filtern">
           {FORMATS.map((f) => (
             <button
               key={f.id}
               type="button"
-              className={`chip${format === f.id ? ' is-active' : ''}`}
+              className={`filterbar__tab${format === f.id ? ' is-active' : ''}`}
               aria-pressed={format === f.id}
               onClick={() => update('format', f.id, 'alle')}
             >
-              {f.label}
-              <span className="chip__count">{counts[f.id] || 0}</span>
+              {f.short}
+              <sup>{counts[f.id] || 0}</sup>
             </button>
           ))}
         </div>
-        <div className="toolbar__right">
-          <label className="select">
+
+        <div className="filterbar__inline">
+          <div className="filterbar__views" role="group" aria-label="Ansicht wählen">
+            {VIEWS.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                className={`filterbar__tab${view === v.id ? ' is-active' : ''}`}
+                aria-pressed={view === v.id}
+                onClick={() => update('ansicht', v.id, 'art')}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+          <label className="filterbar__sort">
             <span className="visually-hidden">Sortierung</span>
             <select value={sort} onChange={(e) => update('sortierung', e.target.value, 'nr')}>
               {SORTS.map((s) => (
@@ -145,21 +167,65 @@ export default function Catalogue() {
               ))}
             </select>
           </label>
-          <div className="segmented" role="group" aria-label="Ansicht wählen">
-            {VIEWS.map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                aria-pressed={view === v.id}
-                className={view === v.id ? 'is-active' : ''}
-                onClick={() => update('ansicht', v.id, 'art')}
-              >
-                {v.label}
+        </div>
+
+        <button
+          type="button"
+          className="filterbar__more"
+          onClick={() => setOptionsOpen(true)}
+          aria-haspopup="dialog"
+          aria-label={`Ansicht und Sortierung (${VIEWS.find((v) => v.id === view).label}, ${SORTS.find((s) => s.id === sort).label})`}
+        >
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M3 6h9M15 6h2M3 14h2M8 14h9" />
+            <circle cx="13.5" cy="6" r="1.6" />
+            <circle cx="6.5" cy="14" r="1.6" />
+          </svg>
+          <span>{VIEWS.find((v) => v.id === view).label}</span>
+        </button>
+      </div>
+
+      {optionsOpen && (
+        <div className="optsheet" role="dialog" aria-modal="true" aria-labelledby="optsheet-title">
+          <button type="button" className="optsheet__scrim" aria-label="Schließen" tabIndex={-1} onClick={() => setOptionsOpen(false)} />
+          <div className="optsheet__panel">
+            <div className="optsheet__head">
+              <p id="optsheet-title" className="eyebrow">Ansicht &amp; Sortierung</p>
+              <button type="button" className="optsheet__done" onClick={() => setOptionsOpen(false)}>
+                Fertig
               </button>
-            ))}
+            </div>
+            <p className="optsheet__label">Ansicht</p>
+            <div className="optsheet__options">
+              {VIEWS.map((v) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  className={view === v.id ? 'is-active' : ''}
+                  aria-pressed={view === v.id}
+                  onClick={() => update('ansicht', v.id, 'art')}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+            <p className="optsheet__label">Sortierung</p>
+            <div className="optsheet__options">
+              {SORTS.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  className={sort === o.id ? 'is-active' : ''}
+                  aria-pressed={sort === o.id}
+                  onClick={() => update('sortierung', o.id, 'nr')}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <h2 className="visually-hidden">Werke ({works.length})</h2>
 

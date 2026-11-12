@@ -170,7 +170,7 @@ export default function Layout() {
           <svg viewBox="0 0 20 20" aria-hidden="true">
             <path d="M3 5h14v10H3z M3 5l7 6 7-6" />
           </svg>
-          Anfrage stellen
+          Anfrage
         </a>
       )}
 
