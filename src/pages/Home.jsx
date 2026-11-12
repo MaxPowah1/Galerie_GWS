@@ -116,7 +116,7 @@ export default function Home() {
         },
         {
           '@type': 'CollectionPage',
-          name: 'Werkverzeichnis Gabriele Wenger-Scherb',
+          name: 'Werke – Gabriele Wenger-Scherb',
           url: toAbsoluteUrl('/'),
           inLanguage: 'de',
           hasPart: paintings.map((work, index) => ({
@@ -140,7 +140,7 @@ export default function Home() {
     applySeo({
       title: 'Gabriele Wenger-Scherb – Zeitgenössische Malerei aus Mittelfranken',
       description:
-        'Zeitgenössische figurative und atmosphärische Malerei von Gabriele Wenger-Scherb in Mittelfranken (Bayern). Alle Werke im Größenverhältnis, Werkverzeichnis und direkte Anfrage.',
+        'Zeitgenössische figurative und atmosphärische Malerei von Gabriele Wenger-Scherb in Mittelfranken (Bayern). Alle Werke im Größenverhältnis, mit Großansicht und direkter Anfrage.',
       canonicalPath: '/',
       keywords: SEO_KEYWORDS,
       ogImage: toAbsoluteUrl('/og/galerie.jpg'),
@@ -173,7 +173,7 @@ export default function Home() {
             </p>
             <div className="cover__actions">
               <Link to="/katalog" className="btn btn--solid">
-                Werkverzeichnis
+                Zu den Werken
               </Link>
               <button type="button" className="btn btn--ghost" onClick={() => scrollToId('contact')}>
                 Anfrage stellen
@@ -240,11 +240,11 @@ export default function Home() {
         </section>
       )}
 
-      {/* ── 02 Werkverzeichnis ────────────────────────────────── */}
+      {/* ── 02 Alle Werke ─────────────────────────────────────── */}
       <section className="chapter" id="werke">
         <SectionHead
           no="02"
-          title="Werkverzeichnis"
+          title="Alle Werke"
           intro="Alle Arbeiten auf einen Blick. Jedes Werk hat eine eigene Seite mit Großansicht, Raumwirkung und Anfrage."
         />
         <div data-reveal="up">
@@ -252,7 +252,7 @@ export default function Home() {
         </div>
         <div className="chapter__more" data-reveal="up">
           <Link to="/katalog" className="btn btn--solid">
-            Katalog mit allen Ansichten
+            Alle Werke in Bildern
           </Link>
         </div>
       </section>

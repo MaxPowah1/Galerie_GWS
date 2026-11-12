@@ -113,7 +113,7 @@ function Work({ slug }) {
       <nav className="work__crumbs eyebrow" aria-label="Brotkrumen">
         <Link to="/">Galerie</Link>
         <span aria-hidden="true">/</span>
-        <Link to="/katalog">Werkverzeichnis</Link>
+        <Link to="/katalog">Werke</Link>
         <span aria-hidden="true">/</span>
         <span aria-current="page">{work.label}</span>
       </nav>

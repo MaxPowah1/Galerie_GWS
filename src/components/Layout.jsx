@@ -4,7 +4,7 @@ import { useSplash } from '../context/SplashContext'
 import LegalDialog from './LegalDialog'
 
 const NAV_ITEMS = [
-  { href: '/katalog', label: 'Werkverzeichnis' },
+  { href: '/katalog', label: 'Werke' },
   { href: '/#ausstellung', label: 'Ausstellung', section: 'ausstellung' },
   { href: '/#artist', label: 'Künstlerin', section: 'artist' },
   { href: '/#contact', label: 'Kontakt', section: 'contact' },

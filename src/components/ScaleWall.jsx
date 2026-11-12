@@ -103,7 +103,7 @@ export default function ScaleWall({ works }) {
           ))}
 
           <Link to="/katalog" className="scalewall__end" draggable={false}>
-            <span>Werkverzeichnis</span>
+            <span>Alle Werke</span>
             <span aria-hidden="true">→</span>
           </Link>
         </div>

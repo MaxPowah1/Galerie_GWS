@@ -101,7 +101,7 @@ const homeImage = await shareImage(
 )
 const catalogueImage = await shareImage(
   [works[2], works[5], works[8], works[1]].map((w) => w.art),
-  'werkverzeichnis.jpg',
+  'werke.jpg',
 )
 for (const w of works) {
   w.ogImage = await shareImage([w.art], `werk-${w.slug}.jpg`)
@@ -173,13 +173,13 @@ await write(
     route: '/',
     title: `${ARTIST} – Zeitgenössische Malerei aus Mittelfranken`,
     description:
-      'Zeitgenössische figurative und atmosphärische Malerei von Gabriele Wenger-Scherb aus Arberg (Mittelfranken). Alle Werke im Größenverhältnis, Werkverzeichnis und direkte Anfrage.',
+      'Zeitgenössische figurative und atmosphärische Malerei von Gabriele Wenger-Scherb aus Arberg (Mittelfranken). Alle Werke im Größenverhältnis, mit Großansicht und direkter Anfrage.',
     image: homeImage,
     jsonLd: {
       '@context': 'https://schema.org',
       '@graph': [{ '@type': 'WebSite', name: ARTIST, url: `${SITE}/`, inLanguage: 'de' }, person],
     },
-    body: `<main class="pr"><div class="pr__hero"><h1>${ARTIST}</h1><p>Zeitgenössische Malerei aus Arberg, Mittelfranken</p></div><section class="pr__more"><h2>Werkverzeichnis</h2><ul>${workList}</ul></section></main>`,
+    body: `<main class="pr"><div class="pr__hero"><h1>${ARTIST}</h1><p>Zeitgenössische Malerei aus Arberg, Mittelfranken</p></div><section class="pr__more"><h2>Werke</h2><ul>${workList}</ul></section></main>`,
   }),
 )
 
@@ -187,18 +187,18 @@ await write(
   '/katalog',
   page({
     route: '/katalog',
-    title: `Werkverzeichnis – Alle Gemälde | ${ARTIST}`,
+    title: `Werke – Alle Gemälde | ${ARTIST}`,
     description: `Alle ${works.length} Gemälde von Gabriele Wenger-Scherb mit Technik und Maßen – an der Wand und im Raum. Preis und Verfügbarkeit auf Anfrage.`,
     image: catalogueImage,
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
-      name: `Werkverzeichnis ${ARTIST}`,
+      name: `Werke – ${ARTIST}`,
       url: `${SITE}/katalog`,
       inLanguage: 'de',
       hasPart: works.map((w) => ({ '@type': 'VisualArtwork', name: w.title, url: `${SITE}/werk/${w.slug}` })),
     },
-    body: `<main class="pr"><div class="pr__hero"><h1>Werkverzeichnis</h1><p>${ARTIST} – alle ${works.length} Gemälde</p></div><section class="pr__more"><ul>${workList}</ul></section></main>`,
+    body: `<main class="pr"><div class="pr__hero"><h1>Meine Werke</h1><p>${ARTIST} – alle ${works.length} Gemälde</p></div><section class="pr__more"><ul>${workList}</ul></section></main>`,
   }),
 )
 
@@ -226,7 +226,7 @@ for (const w of works) {
         creator: person,
         inLanguage: 'de',
       },
-      body: `<main class="pr"><article class="pr__hero"><h1>${esc(name)}</h1><p>${esc(description)}</p><p><a href="/katalog">Zum Werkverzeichnis</a></p></article></main>`,
+      body: `<main class="pr"><article class="pr__hero"><h1>${esc(name)}</h1><p>${esc(description)}</p><p><a href="/katalog">Alle Werke</a></p></article></main>`,
     }),
   )
 }
