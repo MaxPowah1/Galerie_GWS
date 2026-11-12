@@ -1,386 +1,221 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { paintings } from '../data/paintings'
+import WorkIndex from '../components/WorkIndex'
+import useReveal from '../hooks/useReveal'
 import { applySeo, toAbsoluteUrl } from '../utils/seo'
+import { formatDimensions } from '../utils/format'
+
+const VIEWS = [
+  { id: 'art', label: 'Werk' },
+  { id: 'wall', label: 'Wand' },
+  { id: 'room', label: 'Raum' },
+  { id: 'list', label: 'Liste' },
+]
+
+const FORMATS = [
+  { id: 'alle', label: 'Alle' },
+  { id: 'hoch', label: 'Hochformat' },
+  { id: 'quer', label: 'Querformat' },
+  { id: 'quadrat', label: 'Quadratisch' },
+]
+
+const SORTS = [
+  { id: 'nr', label: 'Nummer' },
+  { id: 'gross', label: 'Größte zuerst' },
+  { id: 'klein', label: 'Kleinste zuerst' },
+]
+
+function pick(list, value, fallback) {
+  return list.some((x) => x.id === value) ? value : fallback
+}
 
 export default function Catalogue() {
-  const navigate = useNavigate()
-  const [viewMode, setViewMode] = useState('wall')
-  const [lightboxIndex, setLightboxIndex] = useState(null)
-  const [lightboxView, setLightboxView] = useState('wall')
-  const total = paintings.length
-  const categoryOrder = ['A', 'B', 'C', 'D', 'E', 'F']
-  const priceByCategory = {
-    A: 'von 400 € bis 600 €',
-    B: 'von 600 € bis 800 €',
-    C: 'von 800 € bis 1.000 €',
-    D: 'von 1.000 € bis 1.200 €',
+  const [params, setParams] = useSearchParams()
+  const view = pick(VIEWS, params.get('ansicht'), 'art')
+  const format = pick(FORMATS, params.get('format'), 'alle')
+  const sort = pick(SORTS, params.get('sortierung'), 'nr')
+
+  const update = (key, value, fallback) => {
+    const next = new URLSearchParams(params)
+    if (value === fallback) next.delete(key)
+    else next.set(key, value)
+    setParams(next, { replace: true })
   }
-  const priceGuide = [...new Set(paintings.map(({ priceCategory }) => priceCategory).filter(Boolean))]
-    .sort((a, b) => {
-      const ai = categoryOrder.indexOf(a)
-      const bi = categoryOrder.indexOf(b)
-      if (ai === -1 && bi === -1) return a.localeCompare(b, 'de')
-      if (ai === -1) return 1
-      if (bi === -1) return -1
-      return ai - bi
+
+  const works = useMemo(() => {
+    const list = paintings.filter((p) => format === 'alle' || p.orientation === format)
+    if (sort === 'gross') return [...list].sort((a, b) => b.areaCm2 - a.areaCm2)
+    if (sort === 'klein') return [...list].sort((a, b) => a.areaCm2 - b.areaCm2)
+    return list
+  }, [format, sort])
+
+  const counts = useMemo(() => {
+    const c = { alle: paintings.length }
+    paintings.forEach((p) => {
+      c[p.orientation] = (c[p.orientation] || 0) + 1
     })
-    .map((category) => ({
-      category,
-      priceLabel: priceByCategory[category] || 'Preis auf Anfrage',
-    }))
-
-  const formatDimensions = (dimensions) => {
-    if (!dimensions) return 'Maße folgen'
-    const { widthCm, heightCm } = dimensions
-    if (!widthCm || !heightCm) return 'Maße folgen'
-    return `${heightCm} x ${widthCm} cm (H x B)`
-  }
-
-  const buildArtworkAlt = (work, context) => {
-    const dimensions = formatDimensions(work.dimensions)
-    return `${work.title}, ${work.technique}, ${dimensions}, Preiskategorie ${work.priceCategory}, ${context}`
-  }
-
-  const collectionJsonLd = useMemo(
-    () => ({
-      '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
-      name: 'Katalog - Alle Werke',
-      url: toAbsoluteUrl('/katalog'),
-      inLanguage: 'de',
-      hasPart: paintings.map((work) => ({
-        '@type': 'VisualArtwork',
-        name: work.title,
-        image: toAbsoluteUrl(work.wallSrc),
-        artform: 'Malerei',
-        artMedium: work.technique,
-        width: work.dimensions?.widthCm ? `${work.dimensions.widthCm} cm` : undefined,
-        height: work.dimensions?.heightCm ? `${work.dimensions.heightCm} cm` : undefined,
-        url: toAbsoluteUrl('/katalog'),
-        description: `${work.title}, ${work.technique}, ${formatDimensions(work.dimensions)}, Preiskategorie ${work.priceCategory}.`,
-      })),
-    }),
-    [],
-  )
-
-  const goToGallery = () => {
-    navigate('/', { state: { scrollTo: 'portfolio-lab' } })
-  }
-
-  const goToContact = () => {
-    navigate('/', { state: { scrollTo: 'contact' } })
-  }
-
-  const openLightbox = (index) => {
-    setLightboxIndex(index)
-    setLightboxView('wall')
-  }
-
-  const closeLightbox = useCallback(() => setLightboxIndex(null), [])
-
-  const goToPrevious = useCallback(() => {
-    setLightboxIndex((i) => (i === null ? null : (i - 1 + paintings.length) % paintings.length))
+    return c
   }, [])
 
-  const goToNext = useCallback(() => {
-    setLightboxIndex((i) => (i === null ? null : (i + 1) % paintings.length))
-  }, [])
+  useReveal([view, format, sort])
 
-  const cycleLightboxView = useCallback(() => {
-    setLightboxView((v) => (v === 'wall' ? 'scenario' : v === 'scenario' ? 'split' : 'wall'))
-  }, [])
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (lightboxIndex === null) return
-      if (e.key === 'Escape') closeLightbox()
-      else if (e.key === 'ArrowLeft') goToPrevious()
-      else if (e.key === 'ArrowRight') goToNext()
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [closeLightbox, lightboxIndex, goToPrevious, goToNext])
-
-  useEffect(() => {
-    const items = document.querySelectorAll('[data-catalogue-reveal]')
-    if (!('IntersectionObserver' in window)) {
-      items.forEach((el) => el.classList.add('is-visible'))
-      return
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible')
-          }
-        })
-      },
-      { threshold: 0.08, rootMargin: '0px 0px -5% 0px' },
-    )
-    items.forEach((item) => observer.observe(item))
-    return () => observer.disconnect()
-  }, [total])
+  const techniques = useMemo(() => [...new Set(paintings.map((w) => w.technique))], [])
 
   useEffect(() => {
     applySeo({
-      title: 'Katalog - Alle Werke | Gabriele Wenger-Scherb',
+      title: 'Werkverzeichnis – Alle Gemälde | Gabriele Wenger-Scherb',
       description:
-        'Alle Werke von Gabriele Wenger-Scherb im Katalog: Malerei im Raum und an der Wand, inklusive Technik, Masse und Preiskategorie – fuer Sammler in Mittelfranken, Bayern und darueber hinaus.',
+        'Das Werkverzeichnis von Gabriele Wenger-Scherb: alle Gemälde mit Technik und Maßen, an der Wand und im Raum. Filtern nach Format und Größe, Anfrage direkt zum Werk.',
       canonicalPath: '/katalog',
       keywords:
-        'Kunstkatalog, Gemaelde kaufen, zeitgenoessische Malerei, Galerie, Gabriele Wenger-Scherb, Mittelfranken, Bayern, Kunst kaufen in Mittelfranken',
-      ogType: 'article',
-      ogImage: toAbsoluteUrl(paintings[0]?.wallSrc),
-      jsonLd: collectionJsonLd,
+        'Werkverzeichnis, Gemälde kaufen, zeitgenössische Malerei, Galerie, Gabriele Wenger-Scherb, Mittelfranken, Bayern, Kunst kaufen in Mittelfranken',
+      ogType: 'website',
+      ogImage: toAbsoluteUrl(paintings[0]?.wall.src),
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'Werkverzeichnis Gabriele Wenger-Scherb',
+        url: toAbsoluteUrl('/katalog'),
+        inLanguage: 'de',
+        hasPart: paintings.map((w) => ({
+          '@type': 'VisualArtwork',
+          name: w.title,
+          url: toAbsoluteUrl(`/werk/${w.slug}`),
+          image: toAbsoluteUrl(w.wall.src),
+          artMedium: w.technique,
+        })),
+      },
     })
-  }, [collectionJsonLd])
+  }, [])
 
   return (
-    <div className="catalogue-page">
-      <section className="catalogue-hero" data-catalogue-reveal>
-        <div className="catalogue-hero__content">
-          <p className="catalogue-hero__label">Katalog</p>
-          <h1 className="catalogue-hero__title">Alle Werke</h1>
-          <p className="catalogue-hero__lede">
-            Entdecken Sie die vollständige Werkschau. Jedes Gemälde in zwei Perspektiven: im Raum und an der Wand.
+    <div className="catalogue">
+      <header className="catalogue__head">
+        <p className="eyebrow" data-reveal="fade">
+          <Link to="/" className="crumb">
+            Galerie
+          </Link>{' '}
+          / Werkverzeichnis
+        </p>
+        <h1 className="catalogue__title" data-reveal="up">
+          Werk<em>verzeichnis</em>
+        </h1>
+        <div className="catalogue__intro" data-reveal="up">
+          <p className="catalogue__lede">
+            Alle Gemälde mit Technik und Maßen. Wechseln Sie zwischen Werk, Wandansicht und Raumwirkung – jedes Bild
+            öffnet seine eigene Seite mit Großansicht und Anfrage.
           </p>
-          <div className="catalogue-hero__actions">
-            <button type="button" className="btn btn--dark catalogue-hero__cta" onClick={goToGallery}>
-              Zurück zur Galerie
+          <dl className="catalogue__facts">
+            <div>
+              <dt>Werke</dt>
+              <dd>{paintings.length}</dd>
+            </div>
+            <div>
+              <dt>Techniken</dt>
+              <dd>{techniques.join(' · ')}</dd>
+            </div>
+          </dl>
+        </div>
+      </header>
+
+      <div className="toolbar">
+        <div className="toolbar__group" role="group" aria-label="Nach Format filtern">
+          {FORMATS.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              className={`chip${format === f.id ? ' is-active' : ''}`}
+              aria-pressed={format === f.id}
+              onClick={() => update('format', f.id, 'alle')}
+            >
+              {f.label}
+              <span className="chip__count">{counts[f.id] || 0}</span>
             </button>
+          ))}
+        </div>
+        <div className="toolbar__right">
+          <label className="select">
+            <span className="visually-hidden">Sortierung</span>
+            <select value={sort} onChange={(e) => update('sortierung', e.target.value, 'nr')}>
+              {SORTS.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="segmented" role="group" aria-label="Ansicht wählen">
+            {VIEWS.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                aria-pressed={view === v.id}
+                className={view === v.id ? 'is-active' : ''}
+                onClick={() => update('ansicht', v.id, 'art')}
+              >
+                {v.label}
+              </button>
+            ))}
           </div>
         </div>
-      </section>
-
-      <div className="catalogue-toggle" role="tablist" aria-label="Ansicht wählen" data-catalogue-reveal>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={viewMode === 'split'}
-          className={viewMode === 'split' ? 'is-active' : ''}
-          onClick={() => setViewMode('split')}
-        >
-          Diptychon
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={viewMode === 'scenario'}
-          className={viewMode === 'scenario' ? 'is-active' : ''}
-          onClick={() => setViewMode('scenario')}
-        >
-          Im Raum
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={viewMode === 'wall'}
-          className={viewMode === 'wall' ? 'is-active' : ''}
-          onClick={() => setViewMode('wall')}
-        >
-          An der Wand
-        </button>
       </div>
 
-      <h2 className="catalogue-grid__heading">Werke im Ueberblick</h2>
+      <h2 className="visually-hidden">Werke ({works.length})</h2>
 
-      <ul className="catalogue-grid" aria-label="Werkliste">
-        {paintings.map((work, index) => (
-          <li key={work.id} className="catalogue-grid__item" data-catalogue-reveal>
-            <article className="catalogue-card">
-              <div
-                className="catalogue-card__images"
-                role="button"
-                tabIndex={0}
-                onClick={() => openLightbox(index)}
-                onKeyDown={(e) => e.key === 'Enter' && openLightbox(index)}
-                aria-label={`${work.title} vergrößern`}
-              >
-                {viewMode === 'split' && (
-                  <>
-                    <figure className="catalogue-card__figure catalogue-card__figure--scenario">
-                      <img
-                        src={work.scenarioSrc}
-                        alt={buildArtworkAlt(work, 'im Raum')}
-                        loading={index === 0 ? 'eager' : 'lazy'}
-                      />
-                      <figcaption>Im Raum</figcaption>
-                    </figure>
-                    <figure className="catalogue-card__figure catalogue-card__figure--wall">
-                      <img
-                        src={work.wallSrc}
-                        alt={buildArtworkAlt(work, 'an der Wand')}
-                        loading={index === 0 ? 'eager' : 'lazy'}
-                      />
-                      <figcaption>An der Wand</figcaption>
-                    </figure>
-                  </>
-                )}
-                {viewMode === 'scenario' && (
-                  <figure className="catalogue-card__figure catalogue-card__figure--single">
-                    <img
-                      src={work.scenarioSrc}
-                      alt={buildArtworkAlt(work, 'im Raum')}
-                      loading={index === 0 ? 'eager' : 'lazy'}
-                    />
-                  </figure>
-                )}
-                {viewMode === 'wall' && (
-                  <figure className="catalogue-card__figure catalogue-card__figure--single">
-                    <img
-                      src={work.wallSrc}
-                      alt={buildArtworkAlt(work, 'an der Wand')}
-                      loading={index === 0 ? 'eager' : 'lazy'}
-                    />
-                  </figure>
-                )}
-              </div>
-              <div className="catalogue-card__meta">
-                <div className="catalogue-card__headline">
-                  <h3 className="catalogue-card__title">{work.displayTitle || work.title}</h3>
-                </div>
-                <dl className="catalogue-card__details">
-                  <div className="catalogue-card__detail-row">
-                    <dt>Preiskategorie</dt>
-                    <dd>{work.priceCategory}</dd>
-                  </div>
-                  <div className="catalogue-card__detail-row">
-                    <dt>Technik</dt>
-                    <dd>{work.technique}</dd>
-                  </div>
-                  <div className="catalogue-card__detail-row">
-                    <dt>Maße</dt>
-                    <dd>{formatDimensions(work.dimensions)}</dd>
-                  </div>
-                </dl>
-              </div>
-            </article>
-          </li>
-        ))}
-      </ul>
-
-      <section className="catalogue-pricing" data-catalogue-reveal aria-label="Preiskategorien">
-        <div className="catalogue-pricing__intro">
-          <h2 className="catalogue-pricing__title">Preiskategorien</h2>
+      {view === 'list' ? (
+        <div className="catalogue__list">
+          <WorkIndex works={works} />
         </div>
-        <ul className="catalogue-pricing__list">
-          {priceGuide.map(({ category, priceLabel }) => (
-            <li key={category} className="catalogue-pricing__item">
-              <span className="catalogue-pricing__category">{category}</span>
-              <span className="catalogue-pricing__value">{priceLabel}</span>
-            </li>
-          ))}
+      ) : (
+        <ul className={`cards cards--catalogue cards--${view}`} data-reveal-group>
+          {works.map((work, i) => {
+            const img = view === 'art' ? work.art || work.wall : work[view]
+            return (
+              <li key={`${work.id}-${view}`} data-reveal="up">
+                <Link to={`/werk/${work.slug}`} className="card">
+                  <span className={`card__frame card__frame--${view}`}>
+                    <img
+                      src={view === 'art' ? img.src : img.thumb}
+                      srcSet={view === 'art' ? undefined : img.srcSet}
+                      sizes="(max-width: 560px) 100vw, (max-width: 960px) 50vw, 33vw"
+                      width={img.width}
+                      height={img.height}
+                      alt={`${work.title}, ${work.technique}, ${formatDimensions(work.dimensions)}`}
+                      loading={i < 3 ? 'eager' : 'lazy'}
+                      decoding="async"
+                    />
+                    <span className="card__cta" aria-hidden="true">
+                      Werk ansehen →
+                    </span>
+                  </span>
+                  <span className="card__meta">
+                    <span className="card__no">{work.label}</span>
+                    <span className={`card__title${work.untitled ? ' is-untitled' : ''}`}>{work.title}</span>
+                    <span className="card__spec">
+                      {work.technique} · {formatDimensions(work.dimensions)}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
         </ul>
-      </section>
-
-      <footer className="catalogue-footer" data-catalogue-reveal>
-        <p className="catalogue-footer__text">{total} Werke in dieser Sammlung.</p>
-        <button type="button" className="btn btn--dark" onClick={goToGallery}>
-          Zurück zur Galerie
-        </button>
-        <button type="button" className="btn btn--dark" onClick={goToContact}>
-          Anfrage stellen
-        </button>
-      </footer>
-
-      {lightboxIndex !== null && paintings[lightboxIndex] && (
-        <div
-          className="catalogue-lightbox"
-          onClick={closeLightbox}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Vergrößerte Ansicht"
-        >
-          <div className="catalogue-lightbox__backdrop" />
-          <div
-            className="catalogue-lightbox__panel"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="catalogue-lightbox__view-toggle" role="tablist" aria-label="Ansicht wählen">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={lightboxView === 'wall'}
-                className={lightboxView === 'wall' ? 'is-active' : ''}
-                onClick={() => setLightboxView('wall')}
-              >
-                An der Wand
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={lightboxView === 'scenario'}
-                className={lightboxView === 'scenario' ? 'is-active' : ''}
-                onClick={() => setLightboxView('scenario')}
-              >
-                Im Raum
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={lightboxView === 'split'}
-                className={lightboxView === 'split' ? 'is-active' : ''}
-                onClick={() => setLightboxView('split')}
-              >
-                Diptychon
-              </button>
-            </div>
-            <div
-              className="catalogue-lightbox__content catalogue-lightbox__content--single"
-              onClick={cycleLightboxView}
-              role="button"
-              tabIndex={0}
-              aria-label="Klicken zum Wechseln der Ansicht (Wand, Raum, Diptychon)"
-            >
-              {lightboxView === 'wall' && (
-                <figure className="catalogue-lightbox__figure">
-                  <img
-                    src={paintings[lightboxIndex].wallSrc}
-                    alt={buildArtworkAlt(paintings[lightboxIndex], 'an der Wand')}
-                  />
-                  <figcaption>{paintings[lightboxIndex].displayTitle || paintings[lightboxIndex].title}</figcaption>
-                </figure>
-              )}
-              {lightboxView === 'scenario' && (
-                <figure className="catalogue-lightbox__figure">
-                  <img
-                    src={paintings[lightboxIndex].scenarioSrc}
-                    alt={buildArtworkAlt(paintings[lightboxIndex], 'im Raum')}
-                  />
-                  <figcaption>{paintings[lightboxIndex].displayTitle || paintings[lightboxIndex].title}</figcaption>
-                </figure>
-              )}
-              {lightboxView === 'split' && (
-                <div className="catalogue-lightbox__diptychon">
-                  <figure className="catalogue-lightbox__figure">
-                    <img
-                      src={paintings[lightboxIndex].scenarioSrc}
-                      alt={buildArtworkAlt(paintings[lightboxIndex], 'im Raum')}
-                    />
-                    <figcaption>Im Raum</figcaption>
-                  </figure>
-                  <figure className="catalogue-lightbox__figure">
-                    <img
-                      src={paintings[lightboxIndex].wallSrc}
-                      alt={buildArtworkAlt(paintings[lightboxIndex], 'an der Wand')}
-                    />
-                    <figcaption>An der Wand</figcaption>
-                  </figure>
-                </div>
-              )}
-            </div>
-            <button
-              type="button"
-              className="catalogue-lightbox__close"
-              onClick={closeLightbox}
-              aria-label="Schließen"
-            >
-              ×
-            </button>
-          </div>
-        </div>
       )}
+
+      {works.length === 0 && <p className="catalogue__empty">Keine Werke in diesem Format.</p>}
+
+      <footer className="catalogue__end" data-reveal="up">
+        <p className="catalogue__end-text">Interesse an einer Arbeit, an Preisen oder einer Auftragsarbeit?</p>
+        <div className="catalogue__end-actions">
+          <Link to="/" state={{ scrollTo: 'contact' }} className="btn btn--accent">
+            Anfrage stellen
+          </Link>
+          <Link to="/" className="btn btn--ghost">
+            Zur Startseite
+          </Link>
+        </div>
+      </footer>
     </div>
   )
 }

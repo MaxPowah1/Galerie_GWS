@@ -47,7 +47,7 @@ export function applySeo({
   document.title = title
   upsertMeta('name', 'description', description)
   upsertMeta('name', 'keywords', keywords)
-  upsertMeta('name', 'theme-color', '#f5f1ea')
+  upsertMeta('name', 'theme-color', '#f3efe8')
   upsertMeta('property', 'og:site_name', 'Gabriele Wenger-Scherb')
   upsertMeta('property', 'og:type', ogType)
   upsertMeta('property', 'og:title', title)

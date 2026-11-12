@@ -1,15 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@200;300;400&family=Source+Sans+3:wght@300;400;500&display=swap');
-
 :root {
-  font-family: 'Source Sans 3', 'Arial Narrow', Arial, sans-serif;
-  line-height: 1.55;
-  font-weight: 300;
+  /* Palette — warm gallery paper, printer's ink, one cinnabar accent taken from the paintings */
+  --paper: #f3efe8;
+  --paper-2: #ebe5da;
+  --paper-3: #e2dbce;
+  --ink: #1b1915;
+  --ink-2: #3f3a33;
+  --muted: #6b6358;
+  --rule: rgba(27, 25, 21, 0.14);
+  --rule-strong: rgba(27, 25, 21, 0.85);
+  --accent: #a3361f;
+  --accent-soft: #e08a6f;
+  --night: #161411;
+  --night-2: #23201b;
+
+  /* Type */
+  --serif: 'Instrument Serif', 'Iowan Old Style', 'Times New Roman', serif;
+  --sans: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+
+  /* Layout */
+  --gutter: clamp(16px, 4.2vw, 64px);
+  --max: 1440px;
+  --bar: 68px;
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--paper);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #111;
-  background: #f7f7f6;
+  font-feature-settings: 'kern', 'liga';
 }
 
 *,
@@ -20,15 +44,78 @@
 
 html {
   scroll-behavior: smooth;
-  background: #f7f7f6;
-  overflow-x: hidden;
+  scroll-padding-top: var(--bar);
+  background: var(--paper);
 }
 
 body {
   margin: 0;
   min-width: 0;
-  max-width: 100%;
   overflow-x: hidden;
-  background: #f7f7f6;
-  letter-spacing: 0.02em;
+  background: var(--paper);
+}
+
+body.menu-open {
+  overflow: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+dl,
+dd,
+figure,
+blockquote,
+ol,
+ul {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
